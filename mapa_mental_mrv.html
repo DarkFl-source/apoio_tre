@@ -63,6 +63,44 @@
       border-radius: 8px;
     }
     .source-note a, footer a { color: var(--je-blue); }
+    .simulator-intro {
+      background: linear-gradient(135deg, #eef7ff 0%, #f8fbff 100%);
+      border: 1px solid #cfe3f5;
+      border-left: 5px solid var(--je-blue);
+      border-radius: 12px;
+      padding: 1rem 1.2rem;
+      margin-bottom: 1.25rem;
+      line-height: 1.55;
+    }
+    .simulator-layout { display: grid; grid-template-columns: minmax(220px, 0.35fr) minmax(0, 1fr); gap: 1.25rem; }
+    .simulator-menu, .simulator-panel { background: white; border: 1px solid var(--je-border); border-radius: 14px; box-shadow: var(--shadow-sm); }
+    .simulator-menu { padding: 0.8rem; align-self: start; position: sticky; top: 0.75rem; }
+    .simulator-menu h3 { color: var(--je-blue); font-size: 0.95rem; margin: 0.35rem 0 0.7rem; }
+    .simulator-choice { width: 100%; text-align: left; border: 1px solid var(--je-border); background: #fff; color: var(--je-text-main); border-radius: 9px; padding: 0.65rem 0.7rem; margin-bottom: 0.45rem; cursor: pointer; font: inherit; font-size: 0.8rem; line-height: 1.35; }
+    .simulator-choice:hover, .simulator-choice.active { background: var(--je-blue-light); border-color: var(--je-blue); color: var(--je-blue); }
+    .simulator-choice small { display: block; color: var(--je-text-muted); margin-top: 0.18rem; }
+    .simulator-panel { padding: 1.35rem; }
+    .simulator-panel h3 { color: var(--je-blue); margin-bottom: 0.35rem; }
+    .simulator-meta { display: flex; flex-wrap: wrap; gap: 0.45rem; margin: 0.65rem 0 1rem; }
+    .simulator-badge { display: inline-flex; align-items: center; gap: 0.3rem; border-radius: 999px; padding: 0.25rem 0.6rem; background: var(--je-blue-light); color: var(--je-blue); font-size: 0.72rem; font-weight: 700; }
+    .simulator-badge.supervised { background: var(--je-yellow-light); color: #9a5a00; }
+    .simulator-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.85rem; margin-bottom: 1rem; }
+    .simulator-box { background: var(--je-gray-bg); border-radius: 10px; padding: 0.85rem; }
+    .simulator-box h4 { color: var(--je-blue); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.35rem; }
+    .simulator-box p { font-size: 0.82rem; line-height: 1.45; }
+    .simulator-steps { list-style: none; padding: 0; margin: 0 0 1rem; counter-reset: simstep; }
+    .simulator-steps li { display: flex; align-items: flex-start; gap: 0.6rem; padding: 0.55rem 0.6rem; border-bottom: 1px solid var(--je-border); font-size: 0.83rem; line-height: 1.45; }
+    .simulator-steps li::before { counter-increment: simstep; content: counter(simstep); flex: 0 0 1.45rem; height: 1.45rem; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--je-blue); color: white; font-size: 0.72rem; font-weight: 800; }
+    .simulator-steps label { display: flex; gap: 0.5rem; cursor: pointer; width: 100%; }
+    .simulator-steps input { width: 19px; height: 19px; flex: 0 0 auto; accent-color: var(--je-green); }
+    .simulator-steps input:checked + span { text-decoration: line-through; opacity: 0.65; }
+    .simulator-result { background: var(--je-green-light); color: #166534; border: 1px solid #a7e0c0; border-radius: 9px; padding: 0.75rem; font-size: 0.82rem; line-height: 1.45; }
+    .simulator-result.caution { background: var(--je-yellow-light); color: #854d0e; border-color: #f5d79b; }
+    .simulator-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.8rem; }
+    .simulator-progress { height: 8px; border-radius: 9px; overflow: hidden; background: var(--je-border); margin: 0.45rem 0 0.85rem; }
+    .simulator-progress > div { height: 100%; width: 0; background: linear-gradient(90deg, var(--je-yellow), var(--je-green)); transition: width 0.2s ease; }
+    @media (max-width: 800px) { .simulator-layout { grid-template-columns: 1fr; } .simulator-menu { position: static; } }
+    @media (max-width: 520px) { .simulator-columns { grid-template-columns: 1fr; } .simulator-panel { padding: 1rem 0.8rem; } }
     button:focus-visible, a:focus-visible {
       outline: 3px solid var(--je-yellow);
       outline-offset: 3px;
@@ -728,6 +766,9 @@
     </button>
     <button class="tab-btn" aria-pressed="false" onclick="switchTab('tab-operations')">
       <i class="fa-solid fa-box-archive"></i> 9. Urna, Logística e Encerramento
+    </button>
+    <button class="tab-btn" aria-pressed="false" onclick="switchTab('tab-simulator')">
+      <i class="fa-solid fa-person-chalkboard"></i> 10. Testes Simulados na Urna
     </button>
   </nav>
 
@@ -2556,6 +2597,31 @@
 
       </div>
     </section>
+
+    <!-- ABA 10: TESTES SIMULADOS DIRETAMENTE NA URNA -->
+    <section id="tab-simulator" class="tab-pane">
+      <div class="card-box" style="padding: 1.35rem;">
+        <div class="simulator-intro">
+          <strong><i class="fa-solid fa-person-chalkboard"></i> Treinamento prático na urna eletrônica</strong><br>
+          Use esta aba como roteiro para a instrutoria. Os exercícios pressupõem urna e dados de treinamento fornecidos pelo Cartório Eleitoral. A pessoa instrutora deve anunciar o cenário, distribuir os papéis e observar a sequência no Terminal do Mesário e no Terminal do Eleitor.
+          <br><strong>Regra de segurança:</strong> não provoque falhas, não retire a Mídia de Resultado e não encerre a urna fora de equipamento autorizado para treinamento.
+        </div>
+
+        <div class="simulator-layout">
+          <aside class="simulator-menu" aria-label="Cenários práticos na urna">
+            <h3><i class="fa-solid fa-list-check"></i> Escolha um cenário</h3>
+            <div class="simulator-progress" aria-hidden="true"><div id="simulator-progress-bar"></div></div>
+            <div id="simulator-progress-label" style="font-size: 0.75rem; color: var(--je-text-muted); margin-bottom: 0.7rem;">0 de 10 cenários concluídos</div>
+            <div id="simulator-choices"></div>
+            <button class="ctrl-btn" style="width: 100%; justify-content: center; margin-top: 0.35rem;" onclick="clearSimulatorProgress()"><i class="fa-solid fa-rotate-left"></i> Limpar progresso</button>
+          </aside>
+
+          <article class="simulator-panel" id="simulator-panel" aria-live="polite">
+            <p style="color: var(--je-text-muted);">Carregando cenários...</p>
+          </article>
+        </div>
+      </div>
+    </section>
   </main>
 
   <!-- Rodapé -->
@@ -2700,6 +2766,121 @@
 - Caixa da Urna: Urna lacrada, Cabina dobrada, cabos e sobras
 `;
 
+    // Roteiros de prática na urna. O texto diferencia o que pode ser repetido
+    // livremente do que exige urna de treinamento e supervisão do Cartório.
+    const urnScenarios = [
+      {
+        title: 'Inicialização e teste do teclado', tag: 'Base', actors: 'Presidente + equipe',
+        setup: 'Urna desligada, caixa e cabina disponíveis.',
+        objective: 'Executar a abertura técnica sem pular conferências.',
+        steps: ['Conectar o cabo à tomada e ligar a urna.', 'Conferir município, zona, seção, data, hora e alimentação elétrica.', 'Executar o teste obrigatório do teclado.', 'Identificar o comportamento esperado das luzes indicativas.', 'Dizer o que deve ser registrado na Ata se o teste falhar.'],
+        expected: 'A equipe reconhece a sequência de instalação, o teste do teclado e a necessidade de comunicar qualquer comportamento anormal ao Cartório.', ref: 'Manual, págs. 4 e 14.', supervised: false
+      },
+      {
+        title: 'Registro de presença dos mesários', tag: 'Base', actors: 'Presidente + mesários',
+        setup: 'Urna ligada e na tela de identificação do eleitor.',
+        objective: 'Praticar as duas oportunidades de registrar mesários.',
+        steps: ['Após a Zerésima, acessar o fluxo de registro quando a urna solicitar.', 'Digitar o título de cada mesário e apertar CONFIRMA.', 'Pressionar CONFIRMA novamente para consolidar a presença.', 'Simular o registro de um mesário que chegou depois: CORRIGE → opção 3.', 'Reforçar que todos assinam também a Ata física.'],
+        expected: 'Os títulos são registrados sem atrasar a votação e a equipe sabe que o registro na urna não substitui a Ata.', ref: 'Manual, p. 15.', supervised: false
+      },
+      {
+        title: 'Eleitor com biometria reconhecida', tag: 'Habilitação', actors: 'Presidente + mesário',
+        setup: 'Eleitor de teste com biometria válida cadastrada na urna.',
+        objective: 'Treinar a conferência da tela e a regra da assinatura.',
+        steps: ['Digitar o CPF ou título do eleitor de teste.', 'Conferir os dados exibidos e ditar nome e número sequencial.', 'Mesário localizar o registro correspondente no Caderno.', 'Posicionar o dedo e aguardar o aviso sonoro de reconhecimento.', 'Confirmar que a pessoa não assina o Caderno quando a biometria é reconhecida.'],
+        expected: 'A urna exibe o reconhecimento com sucesso e libera o voto; a equipe aplica a regra de não assinatura.', ref: 'Manual, p. 19.', supervised: false
+      },
+      {
+        title: 'Eleitor sem dados biométricos', tag: 'Habilitação', actors: 'Presidente + mesário',
+        setup: 'Eleitor de teste sem dados biométricos na urna.',
+        objective: 'Separar “sem biometria” de “falha após quatro tentativas”.',
+        steps: ['Digitar o CPF ou título do eleitor de teste.', 'Confirmar a mensagem de ausência de dados biométricos.', 'Perguntar o ano de nascimento e digitá-lo no Terminal do Mesário.', 'Apertar CONFIRMA para habilitar.', 'Simular a assinatura do eleitor no Caderno antes de entrar na cabina.'],
+        expected: 'A urna habilita após o ano de nascimento e a equipe lembra que a assinatura ocorre no Caderno físico.', ref: 'Manual, p. 19.', supervised: false
+      },
+      {
+        title: 'Biometria não reconhecida após quatro tentativas', tag: 'Biometria', actors: 'Presidente + mesário',
+        setup: 'Somente com eleitor de teste preparado pelo Cartório para não ser reconhecido.',
+        objective: 'Praticar a contingência biométrica sem confundi-la com ausência de biometria.',
+        steps: ['Conferir se o documento digitado está correto antes de repetir.', 'Realizar até quatro tentativas, orientando o posicionamento do dedo.', 'Perguntar e digitar o ano de nascimento.', 'Se houver correspondência, o Presidente valida com o próprio dedo.', 'Simular a assinatura do eleitor no Caderno antes do voto.'],
+        expected: 'A equipe identifica o limite de quatro tentativas, a validação pela Presidência e a assinatura obrigatória do eleitor.', ref: 'Manual, p. 21.', supervised: true
+      },
+      {
+        title: 'Pessoa com deficiência visual e áudio', tag: 'Acessibilidade', actors: 'Presidente + mesários',
+        setup: 'Urna de treinamento, fone fornecido pela Justiça Eleitoral e eleitor de teste.',
+        objective: 'Ativar, testar e explicar o sistema de áudio.',
+        steps: ['Antes de habilitar o eleitor, acessar CORRIGE → opção 1 – Ativar áudio.', 'Conectar o fone fornecido pela Justiça Eleitoral.', 'Orientar sobre volume e velocidade da fala no Terminal do Eleitor.', 'Demonstrar o teclado em braile e a marca da tecla 5.', 'Desativar somente quando isso for permitido pelo cadastro e pelo procedimento.'],
+        expected: 'A equipe oferece o recurso sem usar fone próprio e preserva a autonomia e o sigilo do eleitor.', ref: 'Manual, pp. 5, 16 e 30.', supervised: false
+      },
+      {
+        title: 'Suspensão antes de qualquer voto', tag: 'Suspensão', actors: 'Presidente + mesários',
+        setup: 'Eleitor de teste habilitado; instrutor simula desistência sem confirmar nenhum cargo.',
+        objective: 'Executar a suspensão e explicar o direito de retorno.',
+        steps: ['Habilitar o eleitor e encaminhá-lo à cabina.', 'Simular a mensagem de que o eleitor está demorando e não votou.', 'Acessar CORRIGE na tela indicada.', 'Digitar o título do Presidente e confirmar a suspensão.', 'Explicar que o eleitor pode retornar até o encerramento da votação.'],
+        expected: 'A suspensão é confirmada e a equipe sabe que o retorno é possível quando não houve voto em nenhum cargo.', ref: 'Manual, p. 22.', supervised: false
+      },
+      {
+        title: 'Abandono após votar em um cargo', tag: 'Suspensão', actors: 'Presidente + mesários',
+        setup: 'Eleitor de teste habilitado; instrutor simula voto em pelo menos um cargo e saída da cabina.',
+        objective: 'Diferenciar abandono após voto parcial de desistência sem votar.',
+        steps: ['Habilitar o eleitor e registrar voto em pelo menos um cargo.', 'Simular a saída antes da conclusão dos demais cargos.', 'Executar o procedimento de suspensão na urna.', 'Registrar a ocorrência na Ata com horário, identificação e providências.', 'Informar que não é possível retornar para votar nos cargos restantes.'],
+        expected: 'A equipe não promete um retorno que o manual não permite após voto em algum cargo.', ref: 'Manual, pp. 22 e 32.', supervised: false
+      },
+      {
+        title: 'Justificativa pelo número do título', tag: 'Terminal', actors: 'Presidente + mesários',
+        setup: 'Eleitor de teste que não pertence à seção e RJE de treinamento.',
+        objective: 'Praticar o fluxo correto de justificativa no Terminal do Mesário.',
+        steps: ['Conferir o RJE e o documento de identificação de teste.', 'Digitar o número do título, nunca o CPF.', 'Confirmar a mensagem de que a pessoa não pertence à seção.', 'Digitar o ano de nascimento e confirmar.', 'Preencher o RJE de treinamento e entregar o canhoto simulado.'],
+        expected: 'A equipe conclui que o CPF não substitui o título para a justificativa feita na seção.', ref: 'Manual, p. 23.', supervised: false
+      },
+      {
+        title: 'Encerramento, boletins e Mídia de Resultado', tag: 'Encerramento', actors: 'Toda a equipe',
+        setup: 'Somente urna de treinamento autorizada, após simular o último voto.',
+        objective: 'Repetir a sequência final sem retirar a MR antes da hora.',
+        steps: ['Simular o atendimento da fila e o convite às duas últimas pessoas.', 'No Terminal do Mesário, acessar CORRIGE → outras opções → 2 – Encerrar votação.', 'Confirmar que todos votaram, digitar o título do Presidente e seguir as telas.', 'Verificar a primeira via do BU e aguardar a mensagem que autoriza a retirada da MR.', 'Retirar a MR, recolocar a tampa, aplicar o lacre azul assinado e aguardar FIM DOS TRABALHOS.'],
+        expected: 'A equipe respeita a sequência da tela e sabe que o encerramento e a retirada da MR são exercícios supervisionados e irreversíveis naquele equipamento.', ref: 'Manual, pp. 24–26.', supervised: true
+      }
+    ];
+    const simulatorState = { current: 0, done: {}, steps: {} };
+
+    function renderSimulatorChoices() {
+      const el = document.getElementById('simulator-choices');
+      if (!el) return;
+      el.innerHTML = urnScenarios.map((scenario, index) => `<button class="simulator-choice ${index === simulatorState.current ? 'active' : ''}" onclick="selectSimulatorScenario(${index})" aria-pressed="${index === simulatorState.current}">${index + 1}. ${scenario.title}<small>${scenario.tag}${scenario.supervised ? ' • supervisão' : ' • prática livre'}</small></button>`).join('');
+    }
+
+    function renderSimulatorScenario() {
+      const scenario = urnScenarios[simulatorState.current];
+      const panel = document.getElementById('simulator-panel');
+      if (!panel || !scenario) return;
+      const checked = simulatorState.steps[simulatorState.current] || [];
+      panel.innerHTML = `<h3>${scenario.title}</h3>
+        <div class="simulator-meta"><span class="simulator-badge"><i class="fa-solid fa-users"></i> ${scenario.actors}</span><span class="simulator-badge ${scenario.supervised ? 'supervised' : ''}"><i class="fa-solid fa-${scenario.supervised ? 'triangle-exclamation' : 'check'}"></i> ${scenario.supervised ? 'Supervisão obrigatória' : 'Prática livre'}</span><span class="simulator-badge"><i class="fa-solid fa-book"></i> ${scenario.ref}</span></div>
+        <div class="simulator-columns"><div class="simulator-box"><h4>Preparação</h4><p>${scenario.setup}</p></div><div class="simulator-box"><h4>Objetivo</h4><p>${scenario.objective}</p></div></div>
+        <h4 style="color: var(--je-blue); font-size: 0.9rem; margin-bottom: 0.35rem;">Sequência para a equipe</h4>
+        <ol class="simulator-steps">${scenario.steps.map((step, index) => `<li><label><input type="checkbox" ${checked[index] ? 'checked' : ''} onchange="toggleSimulatorStep(${index}, this.checked)"><span>${step}</span></label></li>`).join('')}</ol>
+        <div class="simulator-result ${scenario.supervised ? 'caution' : ''}"><strong>Resultado esperado:</strong> ${scenario.expected}</div>
+        <div class="simulator-actions"><button class="ctrl-btn" onclick="completeSimulatorScenario()"><i class="fa-solid fa-circle-check"></i> ${simulatorState.done[simulatorState.current] ? 'Cenário concluído' : 'Marcar cenário concluído'}</button><button class="ctrl-btn" onclick="resetSimulatorScenario()"><i class="fa-solid fa-rotate-left"></i> Limpar etapas</button></div>`;
+    }
+
+    function saveSimulatorState() { try { localStorage.setItem('mrv-urn-training-v1', JSON.stringify(simulatorState)); } catch (e) {} }
+    function updateSimulatorProgress() {
+      const done = Object.values(simulatorState.done).filter(Boolean).length;
+      const label = document.getElementById('simulator-progress-label');
+      const bar = document.getElementById('simulator-progress-bar');
+      if (label) label.textContent = `${done} de ${urnScenarios.length} cenários concluídos`;
+      if (bar) bar.style.width = `${Math.round(done / urnScenarios.length * 100)}%`;
+    }
+    function selectSimulatorScenario(index) { simulatorState.current = index; renderSimulatorChoices(); renderSimulatorScenario(); saveSimulatorState(); }
+    function toggleSimulatorStep(index, value) { const steps = simulatorState.steps[simulatorState.current] || []; steps[index] = value; simulatorState.steps[simulatorState.current] = steps; saveSimulatorState(); }
+    function completeSimulatorScenario() { simulatorState.done[simulatorState.current] = true; updateSimulatorProgress(); renderSimulatorChoices(); renderSimulatorScenario(); saveSimulatorState(); }
+    function resetSimulatorScenario() { simulatorState.steps[simulatorState.current] = []; simulatorState.done[simulatorState.current] = false; updateSimulatorProgress(); renderSimulatorScenario(); renderSimulatorChoices(); saveSimulatorState(); }
+    function clearSimulatorProgress() { simulatorState.done = {}; simulatorState.steps = {}; updateSimulatorProgress(); renderSimulatorChoices(); renderSimulatorScenario(); saveSimulatorState(); }
+    function initSimulator() {
+      try { const stored = JSON.parse(localStorage.getItem('mrv-urn-training-v1') || '{}'); Object.assign(simulatorState, stored); } catch (e) {}
+      if (!Number.isInteger(simulatorState.current) || simulatorState.current < 0 || simulatorState.current >= urnScenarios.length) simulatorState.current = 0;
+      renderSimulatorChoices(); renderSimulatorScenario(); updateSimulatorProgress();
+    }
+
     // Controle de Abas Otimizado para Desktop e Mobile
     function switchTab(tabId) {
       document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
@@ -2736,6 +2917,7 @@
 
     window.addEventListener('DOMContentLoaded', () => {
       updateChecklistProgress();
+      initSimulator();
       // Inicializar Mermaid se carregado
       if (typeof mermaid !== 'undefined') {
         try {

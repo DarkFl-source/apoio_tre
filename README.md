@@ -17,6 +17,7 @@ Material interativo e didático de apoio e instrutoria para treinamento de mesá
 7. **Guia de Assinaturas e Relatórios:** Regras de ouro (biometria dispensando assinatura, o que fiscais podem/não podem assinar, Lacre Azul) e simulador rápido (quiz).
 8. **Catálogo de Ocorrências em Ata:** Os 25 itens oficiais do verso da Ata (Pág. 32 do Manual) organizados em 6 categorias e 14 fichas com sugestões de redação, a adaptar aos fatos ocorridos.
 9. **Operação da Urna, Logística e Encerramento:** Passo a passo do registro de mesários na urna, consulta aos cadernos da seção, de seções agregadas e de transferência temporária, mídias da urna (MR vs MV), rito das 17h00 e matriz tripla de destinação final de materiais.
+10. **Testes Simulados na Urna:** Dez roteiros práticos para a urna de treinamento, incluindo habilitação biométrica, áudio, suspensão, justificativa e encerramento supervisionado.
 
 ---
 
