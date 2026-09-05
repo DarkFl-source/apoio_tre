@@ -1,0 +1,2745 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mapa Mental: Mesa Receptora de Votos – Eleições 2026</title>
+  
+  <!-- Fontes e Ícones -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- D3.js e Markmap para o Mapa Mental Interativo -->
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <script src="https://cdn.jsdelivr.net/npm/markmap-view@0.15.4"></script>
+  <script src="https://cdn.jsdelivr.net/npm/markmap-lib@0.15.4"></script>
+
+  <!-- html2canvas para exportação em PNG de alta definição sem problemas de CORS -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+  <style>
+    :root {
+      --je-blue: #0A3A60;
+      --je-blue-dark: #072540;
+      --je-blue-light: #EBF3FA;
+      --je-yellow: #F5A623;
+      --je-yellow-light: #FEF6E9;
+      --je-green: #1B8A5A;
+      --je-green-light: #EAF6F0;
+      --je-red: #D9383A;
+      --je-gray-bg: #F4F6F9;
+      --je-card-bg: #FFFFFF;
+      --je-text-main: #1E293B;
+      --je-text-muted: #64748B;
+      --je-border: #E2E8F0;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-md: 0 4px 12px rgba(10,58,96,0.08);
+      --shadow-lg: 0 10px 25px rgba(10,58,96,0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--je-gray-bg);
+      color: var(--je-text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Banner Institucional */
+    header {
+      background: linear-gradient(135deg, var(--je-blue-dark) 0%, var(--je-blue) 100%);
+      color: white;
+      padding: 1.25rem 2rem;
+      border-bottom: 4px solid var(--je-yellow);
+      box-shadow: var(--shadow-md);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .header-branding {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .header-logo-badge {
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      padding: 0.6rem 0.9rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .header-logo-badge i {
+      font-size: 1.8rem;
+      color: var(--je-yellow);
+    }
+
+    .header-titles h1 {
+      font-size: 1.4rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .header-titles p {
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.8);
+      font-weight: 500;
+    }
+
+    .header-badge-tag {
+      background: var(--je-yellow);
+      color: var(--je-blue-dark);
+      font-weight: 700;
+      font-size: 0.75rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Navegação por Abas */
+    nav.tab-nav {
+      background: white;
+      border-bottom: 1px solid var(--je-border);
+      padding: 0.5rem 2rem 0;
+      display: flex;
+      gap: 0.5rem;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      outline: none;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--je-text-muted);
+      padding: 0.75rem 1.25rem;
+      border-bottom: 3px solid transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+      color: var(--je-blue);
+      background: var(--je-blue-light);
+      border-radius: 8px 8px 0 0;
+    }
+
+    .tab-btn.active {
+      color: var(--je-blue);
+      border-bottom-color: var(--je-blue);
+      background: rgba(10, 58, 96, 0.04);
+      border-radius: 8px 8px 0 0;
+    }
+
+    /* Container Principal */
+    main {
+      flex: 1;
+      padding: 1.5rem 2rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .tab-pane {
+      display: none;
+      animation: fadeIn 0.3s ease;
+      height: 100%;
+    }
+
+    .tab-pane.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Card Box Principal */
+    .card-box {
+      background: var(--je-card-bg);
+      border-radius: 16px;
+      border: 1px solid var(--je-border);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    /* Barra de Controles do Mapa */
+    .map-controls-bar {
+      padding: 0.75rem 1.25rem;
+      background: white;
+      border-bottom: 1px solid var(--je-border);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+
+    .map-tips {
+      font-size: 0.85rem;
+      color: var(--je-text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 0.4rem;
+    }
+
+    .ctrl-btn {
+      background: white;
+      border: 1px solid var(--je-border);
+      color: var(--je-text-main);
+      padding: 0.4rem 0.8rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.2s ease;
+    }
+
+    .ctrl-btn:hover {
+      background: var(--je-blue-light);
+      border-color: var(--je-blue);
+      color: var(--je-blue);
+    }
+
+    .ctrl-btn.btn-export {
+      background: var(--je-blue);
+      border-color: var(--je-blue);
+      color: white;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .ctrl-btn.btn-export:hover {
+      background: var(--je-blue-dark);
+      border-color: var(--je-blue-dark);
+      color: var(--je-yellow);
+    }
+
+    /* Container do SVG do Mapa Mental */
+    .mindmap-viewport {
+      width: 100%;
+      height: 720px;
+      background: #FFFFFF;
+      position: relative;
+    }
+
+    #markmap-svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* Painel de Fichas de Funções */
+    .roles-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .role-card {
+      background: white;
+      border-radius: 16px;
+      border: 1px solid var(--je-border);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .role-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .role-card-header {
+      padding: 1.25rem;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .role-card-header.president {
+      background: linear-gradient(135deg, #0A3A60 0%, #155e75 100%);
+    }
+
+    .role-card-header.mesarios {
+      background: linear-gradient(135deg, #1B8A5A 0%, #0d9488 100%);
+    }
+
+    .role-card-header.secretary {
+      background: linear-gradient(135deg, #D97706 0%, #EA580C 100%);
+    }
+
+    .role-icon-box {
+      width: 48px;
+      height: 48px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+
+    .role-title-box h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .role-title-box span {
+      font-size: 0.8rem;
+      opacity: 0.9;
+    }
+
+    .role-card-body {
+      padding: 1.25rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .duty-block {
+      background: var(--je-gray-bg);
+      border-radius: 10px;
+      padding: 0.9rem;
+      border-left: 4px solid var(--je-blue);
+    }
+
+    .duty-block.highlight {
+      border-left-color: var(--je-yellow);
+      background: var(--je-yellow-light);
+    }
+
+    .duty-block h4 {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .duty-block ul {
+      list-style-type: none;
+      padding-left: 0;
+    }
+
+    .duty-block li {
+      font-size: 0.85rem;
+      line-height: 1.45;
+      margin-bottom: 0.35rem;
+      position: relative;
+      padding-left: 1.2rem;
+    }
+
+    .duty-block li::before {
+      content: "•";
+      color: var(--je-blue);
+      font-weight: bold;
+      position: absolute;
+      left: 0.2rem;
+      font-size: 1.1rem;
+      top: -0.1rem;
+    }
+
+    /* Tabela Comparativa */
+    .table-container {
+      overflow-x: auto;
+      background: white;
+      border-radius: 16px;
+      border: 1px solid var(--je-border);
+    }
+
+    table.styled-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+
+    table.styled-table thead tr {
+      background-color: var(--je-blue);
+      color: white;
+    }
+
+    table.styled-table th, 
+    table.styled-table td {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--je-border);
+    }
+
+    table.styled-table tbody tr:hover {
+      background-color: var(--je-blue-light);
+    }
+
+    .badge-yes {
+      background: var(--je-green-light);
+      color: var(--je-green);
+      font-weight: 700;
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .badge-no {
+      background: #F1F5F9;
+      color: #94A3B8;
+      font-weight: 500;
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+    }
+
+    .badge-opt {
+      background: var(--je-yellow-light);
+      color: #B45309;
+      font-weight: 600;
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+    }
+
+    /* Estilo Mermaid Container */
+    .mermaid-box {
+      background: white;
+      padding: 2.5rem 1.5rem;
+      border-radius: 16px;
+      border: 1px solid var(--je-border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: auto;
+    }
+
+    .mermaid-box h3 {
+      margin-bottom: 1.5rem;
+      color: var(--je-blue);
+      font-weight: 800;
+    }
+
+    footer {
+      background: white;
+      border-top: 1px solid var(--je-border);
+      padding: 1rem 2rem;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--je-text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    @media (max-width: 768px) {
+      header, main, nav.tab-nav, footer {
+        padding-left: 1rem;
+        padding-right: 1rem;
+      }
+      .mindmap-viewport {
+        height: 540px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Topo Institucional -->
+  <header>
+    <div class="header-branding">
+      <div class="header-logo-badge">
+        <i class="fa-solid fa-check-to-slot"></i>
+      </div>
+      <div class="header-titles">
+        <h1>Mesa Receptora de Votos (MRV) – Eleições 2026</h1>
+        <p>Instrutoria de Mesários • Resolução-TSE nº 23.751/2026</p>
+      </div>
+    </div>
+    <div class="header-badge-tag">
+      #VotoNaDemocracia
+    </div>
+  </header>
+
+  <!-- Navegação por Abas -->
+  <nav class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab('tab-mindmap')">
+      <i class="fa-solid fa-brain"></i> 1. Mapa Mental Interativo (D3)
+    </button>
+    <button class="tab-btn" onclick="switchTab('tab-cards')">
+      <i class="fa-solid fa-id-card-clip"></i> 2. Fichas por Função
+    </button>
+    <button class="tab-btn" onclick="switchTab('tab-matrix')">
+      <i class="fa-solid fa-table-list"></i> 3. Matriz de Responsabilidades
+    </button>
+    <button class="tab-btn" onclick="switchTab('tab-flow')">
+      <i class="fa-solid fa-diagram-project"></i> 4. Hierarquia e Substituição
+    </button>
+    <button class="tab-btn" onclick="switchTab('tab-docs')">
+      <i class="fa-solid fa-address-card"></i> 5. Documentos de Identificação
+    </button>
+    <button class="tab-btn" onclick="switchTab('tab-checklist')">
+      <i class="fa-solid fa-list-check"></i> 6. Checklist Pré-Votação
+    </button>
+    <button class="tab-btn" onclick="switchTab('tab-signatures')">
+      <i class="fa-solid fa-file-signature"></i> 7. Guia de Assinaturas e Relatórios
+    </button>
+    <button class="tab-btn" onclick="switchTab('tab-occurrences')">
+      <i class="fa-solid fa-clipboard-list"></i> 8. Ocorrências e Ata
+    </button>
+    <button class="tab-btn" onclick="switchTab('tab-operations')">
+      <i class="fa-solid fa-box-archive"></i> 9. Urna, Logística e Encerramento
+    </button>
+  </nav>
+
+  <!-- Conteúdo Principal -->
+  <main>
+    
+    <!-- ABA 1: MAPA MENTAL INTERATIVO (Markmap / D3) -->
+    <section id="tab-mindmap" class="tab-pane active">
+      <div class="card-box">
+        <div class="map-controls-bar">
+          <div class="map-tips">
+            <i class="fa-solid fa-circle-info" style="color: var(--je-blue);"></i>
+            <span><strong>Interatividade:</strong> Clique nos círculos para recolher/expandir ramos. Arraste com o mouse para navegar e use o scroll para zoom.</span>
+          </div>
+          <div class="btn-group">
+            <button class="ctrl-btn" onclick="fitView()"><i class="fa-solid fa-expand"></i> Ajustar à Tela</button>
+            <button class="ctrl-btn" onclick="expandAll()"><i class="fa-solid fa-circle-plus"></i> Expandir Tudo</button>
+            <button class="ctrl-btn" onclick="collapseAll()"><i class="fa-solid fa-circle-minus"></i> Recolher</button>
+            <button class="ctrl-btn btn-export" id="btn-export-png" onclick="exportMapAsPNG()"><i class="fa-solid fa-download"></i> Exportar Imagem (PNG)</button>
+          </div>
+        </div>
+        <div class="mindmap-viewport">
+          <svg id="markmap-svg"></svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- ABA 2: FICHAS INDIVIDUAIS POR PAPEL -->
+    <section id="tab-cards" class="tab-pane">
+      <div class="roles-grid">
+        
+        <!-- CARD: PRESIDENTE -->
+        <div class="role-card">
+          <div class="role-card-header president">
+            <div class="role-icon-box">
+              <i class="fa-solid fa-user-tie"></i>
+            </div>
+            <div class="role-title-box">
+              <h3>Presidente da Seção</h3>
+              <span>Autoridade Máxima no Recinto</span>
+            </div>
+          </div>
+          <div class="role-card-body">
+            <div class="duty-block highlight">
+              <h4><i class="fa-solid fa-shield-halved"></i> Liderança e Manutenção da Ordem</h4>
+              <ul>
+                <li>Autoridade máxima na seção eleitoral; mantém a ordem e aciona as forças de segurança pública quando necessário.</li>
+                <li>Resolve dúvidas e esclarece conflitos com serenidade, sem deles participar.</li>
+                <li>Comunica imediatamente ao Cartório ocorrências submetidas à Juíza ou ao Juiz Eleitoral.</li>
+              </ul>
+            </div>
+
+            <div class="duty-block">
+              <h4><i class="fa-solid fa-desktop"></i> Operação da Urna Eletrônica</h4>
+              <ul>
+                <li>Liga a urna, comanda o teste obrigatório de teclado e emite a <strong>Zerésima</strong> (com 2 testemunhas da fila).</li>
+                <li>Digita o <strong>CPF ou Título</strong> para habilitar o eleitor e dita em voz alta o nome e o número sequencial.</li>
+                <li><strong>Exclusividade de Biometria:</strong> Se a biometria falhar após 4 tentativas, digita o ano de nascimento e <strong>atesta com seu próprio dedo</strong> no sensor.</li>
+                <li>Registra justificativa no terminal (utilizando obrigatoriamente o número do Título).</li>
+                <li>Encerra a votação às 17h, retira a <strong>Mídia de Resultado (MR)</strong> e aplica o <strong>lacre azul de reposição</strong>.</li>
+              </ul>
+            </div>
+
+            <div class="duty-block">
+              <h4><i class="fa-solid fa-file-signature"></i> Fiscalização e Devolução</h4>
+              <ul>
+                <li>Verifica credenciais de fiscais partidários e membros da MOE (Missão de Observação).</li>
+                <li>Afixa o Resumo da Zerésima na abertura e 1 via do BU na porta ao término.</li>
+                <li>Guarda uma via do BU para posterior conferência no site do TSE e devolve materiais à Junta Eleitoral.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- CARD: 1º E 2º MESÁRIOS -->
+        <div class="role-card">
+          <div class="role-card-header mesarios">
+            <div class="role-icon-box">
+              <i class="fa-solid fa-users"></i>
+            </div>
+            <div class="role-title-box">
+              <h3>1º e 2º Mesários</h3>
+              <span>Caderno de Votação, Comprovantes e Ata</span>
+            </div>
+          </div>
+          <div class="role-card-body">
+            <div class="duty-block highlight">
+              <h4><i class="fa-solid fa-arrow-turn-up"></i> Linha de Sucessão</h4>
+              <ul>
+                <li>O <strong>1º Mesário substitui o Presidente</strong> caso este não compareça até 30 min antes (07h30).</li>
+                <li>O 2º Mesário substitui o 1º Mesário ou assume a Presidência na falta de ambos.</li>
+              </ul>
+            </div>
+
+            <div class="duty-block">
+              <h4><i class="fa-solid fa-book-open"></i> Caderno de Votação e Assinaturas</h4>
+              <ul>
+                <li>Localizam o nome do eleitor pelo número sequencial ditado pelo Presidente (orientando-se pelas iniciais no canto da página).</li>
+                <li>Confirmam o nome em voz alta.</li>
+                <li><strong>Atenção à Assinatura:</strong> Colhem a assinatura <strong>APENAS quando não houver identificação biométrica</strong> (ou se ela falhar). Se a biometria validou, <strong>não assina</strong>!</li>
+                <li>Ao final da votação, escrevem <strong>"NC"</strong> (Não Compareceu) nos faltosos.</li>
+              </ul>
+            </div>
+
+            <div class="duty-block">
+              <h4><i class="fa-solid fa-pen-nib"></i> Comprovantes e Ata da Seção</h4>
+              <ul>
+                <li>Entregam o comprovante de votação após a saída da cabina e resgate dos pertences.</li>
+                <li>Guardam comprovantes recusados no envelope adequado.</li>
+                <li>Preenchem continuamente a <strong>Ata da Mesa Receptora</strong> (ocorrências, fiscais que compareceram, identificação de acompanhantes).</li>
+                <li>Auxiliam no preenchimento do RJE e do Formulário para Eleitor com Deficiência.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- CARD: SECRETÁRIO(A) -->
+        <div class="role-card">
+          <div class="role-card-header secretary">
+            <div class="role-icon-box">
+              <i class="fa-solid fa-person-shelter"></i>
+            </div>
+            <div class="role-title-box">
+              <h3>Secretária ou Secretário</h3>
+              <span>Recepção, Fila, Prioridades e Corte das 17h</span>
+            </div>
+          </div>
+          <div class="role-card-body">
+            <div class="duty-block highlight">
+              <h4><i class="fa-solid fa-id-card"></i> Triagem na Porta</h4>
+              <ul>
+                <li>Recepciona o eleitor na fila externa e confere se está no local e na seção corretos.</li>
+                <li>Examina documento oficial com foto ou e-Título (com foto).</li>
+                <li>Pergunta se o eleitor sabe o <strong>número do CPF</strong> para adiantar a digitação pelo Presidente.</li>
+              </ul>
+            </div>
+
+            <div class="duty-block">
+              <h4><i class="fa-solid fa-wheelchair"></i> Aplicação Rigorosa das Prioridades</h4>
+              <ul>
+                <li><strong>Superprioridade:</strong> 80 anos ou mais têm prioridade imediata sobre todos.</li>
+                <li><strong>Prioridades por Chegada:</strong> 60+, PCD, autistas, mobilidade reduzida, gestantes, lactantes, pessoas com criança de colo, obesas e enfermos.</li>
+                <li><strong>Acompanhante de PCD:</strong> A prioridade se estende a ele, mesmo que vote em outra seção!</li>
+                <li><strong>Doadores de Sangue:</strong> Comprovante emitido há no máximo 120 dias.</li>
+              </ul>
+            </div>
+
+            <div class="duty-block">
+              <h4><i class="fa-solid fa-clock"></i> Procedimento Pontual das 17h</h4>
+              <ul>
+                <li>Exatamente às 17h00 (horário de Brasília), distribui senhas aos presentes na fila.</li>
+                <li><strong>Sentido obrigatório:</strong> Da <strong>última</strong> pessoa da fila até a primeira, encerrando a entrada de novos eleitores.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ABA 3: MATRIZ DE RESPONSABILIDADES -->
+    <section id="tab-matrix" class="tab-pane">
+      <div class="table-container">
+        <table class="styled-table">
+          <thead>
+            <tr>
+              <th>Procedimento / Atribuição</th>
+              <th>Presidente</th>
+              <th>1º e 2º Mesários</th>
+              <th>Secretário(a)</th>
+              <th>Momento</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Autoridade máxima e manutenção da ordem</strong></td>
+              <td><span class="badge-yes"><i class="fa-solid fa-check"></i> Exclusivo</span></td>
+              <td><span class="badge-no">Substituto legal</span></td>
+              <td><span class="badge-no">Não</span></td>
+              <td>Durante todo o dia</td>
+            </tr>
+            <tr>
+              <td><strong>Verificação prévia de documentos na fila</strong></td>
+              <td><span class="badge-no">Não</span></td>
+              <td><span class="badge-no">Não</span></td>
+              <td><span class="badge-yes"><i class="fa-solid fa-check"></i> Titular</span></td>
+              <td>Durante a votação</td>
+            </tr>
+            <tr>
+              <td><strong>Organização da fila e prioridades (80+, PCD, etc.)</strong></td>
+              <td><span class="badge-opt">Fiscaliza</span></td>
+              <td><span class="badge-no">Não</span></td>
+              <td><span class="badge-yes"><i class="fa-solid fa-check"></i> Titular</span></td>
+              <td>Durante a votação</td>
+            </tr>
+            <tr>
+              <td><strong>Digitar CPF/Título e comandar Terminal do Mesário</strong></td>
+              <td><span class="badge-yes"><i class="fa-solid fa-check"></i> Titular</span></td>
+              <td><span class="badge-opt">Delegável</span></td>
+              <td><span class="badge-no">Não</span></td>
+              <td>Durante a votação</td>
+            </tr>
+            <tr>
+              <td><strong>Localizar eleitor no Caderno de Votação</strong></td>
+              <td><span class="badge-no">Não</span></td>
+              <td><span class="badge-yes"><i class="fa-solid fa-check"></i> Titular</span></td>
+              <td><span class="badge-no">Não</span></td>
+              <td>Durante a votação</td>
+            </tr>
+            <tr>
+              <td><strong>Colher assinatura (apenas se sem biometria)</strong></td>
+              <td><span class="badge-no">Não</span></td>
+              <td><span class="badge-yes"><i class="fa-solid fa-check"></i> Titular</span></td>
+              <td><span class="badge-no">Não</span></td>
+              <td>Durante a votação</td>
+            </tr>
+            <tr>
+              <td><strong>Atestar falha de biometria com o próprio dedo</strong></td>
+              <td><span class="badge-yes"><i class="fa-solid fa-check"></i> Exclusivo</span></td>
+              <td><span class="badge-no">Não</span></td>
+              <td><span class="badge-no">Não</span></td>
+              <td>Após 4 tentativas</td>
+            </tr>
+            <tr>
+              <td><strong>Entregar comprovante de votação</strong></td>
+              <td><span class="badge-no">Não</span></td>
+              <td><span class="badge-yes"><i class="fa-solid fa-check"></i> Titular</span></td>
+              <td><span class="badge-no">Não</span></td>
+              <td>Após voto na cabina</td>
+            </tr>
+            <tr>
+              <td><strong>Preenchimento da Ata de Ocorrências e Fiscais</strong></td>
+              <td><span class="badge-opt">Supervisiona/Assina</span></td>
+              <td><span class="badge-yes"><i class="fa-solid fa-check"></i> Titular</span></td>
+              <td><span class="badge-opt">Assina ao final</span></td>
+              <td>Tempo real</td>
+            </tr>
+            <tr>
+              <td><strong>Distribuição de senhas às 17h (último ao primeiro)</strong></td>
+              <td><span class="badge-opt">Autoriza</span></td>
+              <td><span class="badge-no">Não</span></td>
+              <td><span class="badge-yes"><i class="fa-solid fa-check"></i> Titular</span></td>
+              <td>Às 17h00</td>
+            </tr>
+            <tr>
+              <td><strong>Retirada da Mídia de Resultado (MR) e lacre azul</strong></td>
+              <td><span class="badge-yes"><i class="fa-solid fa-check"></i> Exclusivo</span></td>
+              <td><span class="badge-opt">Testemunham</span></td>
+              <td><span class="badge-opt">Testemunha</span></td>
+              <td>Encerramento</td>
+            </tr>
+            <tr>
+              <td><strong>Anotar "NC" nos eleitores ausentes no Caderno</strong></td>
+              <td><span class="badge-no">Não</span></td>
+              <td><span class="badge-yes"><i class="fa-solid fa-check"></i> Titular</span></td>
+              <td><span class="badge-no">Não</span></td>
+              <td>Após encerramento</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ABA 4: FLUXO E HIERARQUIA (Visual Nativo) -->
+    <section id="tab-flow" class="tab-pane">
+      <div class="card-box" style="padding: 2rem;">
+        <h2 style="font-size: 1.25rem; font-weight: 800; color: var(--je-blue); margin-bottom: 1.5rem; text-align: center;">
+          <i class="fa-solid fa-arrows-split-up-and-left"></i> Dinâmica Operacional e Linha Sucessória da MRV
+        </h2>
+
+        <!-- Bloco 1: Linha de Sucessão -->
+        <div style="background: var(--je-gray-bg); border-radius: 14px; padding: 1.5rem; margin-bottom: 2rem; border-left: 5px solid var(--je-yellow);">
+          <h3 style="font-size: 1rem; font-weight: 700; color: var(--je-blue-dark); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fa-solid fa-clock-rotate-left" style="color: var(--je-yellow);"></i> Linha Sucessória da Presidência (em caso de ausência)
+          </h3>
+          <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 1rem;">
+            
+            <div style="background: white; border: 2px solid var(--je-blue); border-radius: 12px; padding: 1rem 1.25rem; text-align: center; min-width: 220px; box-shadow: var(--shadow-sm);">
+              <i class="fa-solid fa-user-tie" style="font-size: 1.8rem; color: var(--je-blue); margin-bottom: 0.5rem;"></i>
+              <div style="font-weight: 800; color: var(--je-blue);">Presidente da Mesa</div>
+              <div style="font-size: 0.75rem; color: var(--je-text-muted); margin-top: 0.25rem;">Autoridade Titular</div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; align-items: center; color: var(--je-red); font-size: 0.8rem; font-weight: 700;">
+              <span>Falta até 07h30</span>
+              <i class="fa-solid fa-arrow-right" style="font-size: 1.3rem; margin-top: 0.2rem;"></i>
+            </div>
+
+            <div style="background: white; border: 2px solid var(--je-green); border-radius: 12px; padding: 1rem 1.25rem; text-align: center; min-width: 220px; box-shadow: var(--shadow-sm);">
+              <i class="fa-solid fa-user-check" style="font-size: 1.8rem; color: var(--je-green); margin-bottom: 0.5rem;"></i>
+              <div style="font-weight: 800; color: var(--je-green);">1º Mesário</div>
+              <div style="font-size: 0.75rem; color: var(--je-text-muted); margin-top: 0.25rem;">Assume a Presidência</div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; align-items: center; color: var(--je-red); font-size: 0.8rem; font-weight: 700;">
+              <span>Falta de ambos</span>
+              <i class="fa-solid fa-arrow-right" style="font-size: 1.3rem; margin-top: 0.2rem;"></i>
+            </div>
+
+            <div style="background: white; border: 2px solid var(--je-yellow); border-radius: 12px; padding: 1rem 1.25rem; text-align: center; min-width: 220px; box-shadow: var(--shadow-sm);">
+              <i class="fa-solid fa-user-gear" style="font-size: 1.8rem; color: #b45309; margin-bottom: 0.5rem;"></i>
+              <div style="font-weight: 800; color: #b45309;">2º Mesário</div>
+              <div style="font-size: 0.75rem; color: var(--je-text-muted); margin-top: 0.25rem;">Assume a Presidência</div>
+            </div>
+
+          </div>
+          <div style="margin-top: 1rem; text-align: center; font-size: 0.85rem; color: var(--je-text-muted);">
+            <i class="fa-solid fa-circle-exclamation" style="color: var(--je-yellow);"></i> Toda e qualquer substituição deve ser comunicada de imediato ao Cartório Eleitoral e anotada na <strong>Ata da Mesa Receptora</strong>.
+          </div>
+        </div>
+
+        <!-- Bloco 2: Triade de Atuação durante o Pleito -->
+        <div>
+          <h3 style="font-size: 1rem; font-weight: 700; color: var(--je-blue-dark); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fa-solid fa-people-arrows" style="color: var(--je-blue);"></i> Atuação Simultânea e Integrada na Seção
+          </h3>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem;">
+            
+            <div style="background: var(--je-blue-light); border-radius: 12px; padding: 1.25rem; border-top: 4px solid var(--je-blue);">
+              <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
+                <div style="width: 36px; height: 36px; background: var(--je-blue); color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                  <i class="fa-solid fa-laptop"></i>
+                </div>
+                <div>
+                  <div style="font-weight: 800; color: var(--je-blue);">Presidente</div>
+                  <div style="font-size: 0.75rem; color: var(--je-text-muted);">Terminal do Mesário & Urna</div>
+                </div>
+              </div>
+              <p style="font-size: 0.85rem; line-height: 1.4; color: var(--je-text-main);">
+                Digita CPF ou Título, confere os dados no visor, dita em voz alta o nome e o número sequencial e comanda a validação da biometria.
+              </p>
+            </div>
+
+            <div style="background: var(--je-green-light); border-radius: 12px; padding: 1.25rem; border-top: 4px solid var(--je-green);">
+              <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
+                <div style="width: 36px; height: 36px; background: var(--je-green); color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                  <i class="fa-solid fa-book-bookmark"></i>
+                </div>
+                <div>
+                  <div style="font-weight: 800; color: var(--je-green);">1º e 2º Mesários</div>
+                  <div style="font-size: 0.75rem; color: var(--je-text-muted);">Caderno, Comprovantes & Ata</div>
+                </div>
+              </div>
+              <p style="font-size: 0.85rem; line-height: 1.4; color: var(--je-text-main);">
+                Localizam a folha pelo sequencial, confirmam o nome, colhem assinatura se não houver biometria, entregam o comprovante e anotam ocorrências na Ata.
+              </p>
+            </div>
+
+            <div style="background: var(--je-yellow-light); border-radius: 12px; padding: 1.25rem; border-top: 4px solid var(--je-yellow);">
+              <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
+                <div style="width: 36px; height: 36px; background: var(--je-yellow); color: var(--je-blue-dark); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                  <i class="fa-solid fa-door-open"></i>
+                </div>
+                <div>
+                  <div style="font-weight: 800; color: #92400e);">Secretária / Secretário</div>
+                  <div style="font-size: 0.75rem; color: var(--je-text-muted);">Entrada, Fila & Prioridades</div>
+                </div>
+              </div>
+              <p style="font-size: 0.85rem; line-height: 1.4; color: var(--je-text-main);">
+                Triagem do documento com foto, conferência da seção, organização rigorosa das prioridades legais e distribuição de senhas às 17h00 (do último para o primeiro).
+              </p>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ABA 5: DOCUMENTOS DE IDENTIFICAÇÃO (VÁLIDOS E INVÁLIDOS) -->
+    <section id="tab-docs" class="tab-pane">
+      <div class="card-box" style="padding: 2rem;">
+        
+        <!-- Cabeçalho da Aba -->
+        <div style="text-align: center; margin-bottom: 2rem;">
+          <h2 style="font-size: 1.35rem; font-weight: 800; color: var(--je-blue); margin-bottom: 0.4rem;">
+            <i class="fa-solid fa-address-card"></i> Identificação da Eleitora e do Eleitor para Votação
+          </h2>
+          <p style="font-size: 0.88rem; color: var(--je-text-muted); font-weight: 500;">
+            Fundamentação Oficial: <strong>Manual do Mesário 2026, Página 10</strong> e Resolução-TSE nº 23.751/2026
+          </p>
+        </div>
+
+        <!-- Banner de Regra Fundamental (Validade Vencida & Regra de Ouro) -->
+        <div style="background: linear-gradient(135deg, #FEF6E9 0%, #FFFBEB 100%); border: 1.5px solid var(--je-yellow); border-radius: 14px; padding: 1.25rem 1.5rem; margin-bottom: 2rem; display: flex; align-items: flex-start; gap: 1rem;">
+          <div style="width: 44px; height: 44px; background: var(--je-yellow); color: var(--je-blue-dark); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0; margin-top: 0.1rem;">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+          </div>
+          <div>
+            <h4 style="font-size: 0.95rem; font-weight: 800; color: #92400e; margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.03em;">
+              Regra de Ouro da Identificação Eleitoral (Manual do Mesário, Pág. 10)
+            </h4>
+            <p style="font-size: 0.88rem; line-height: 1.5; color: #78350f;">
+              • <strong>Documento Oficial COM FOTO:</strong> É obrigatória a apresentação de documento oficial com foto, seja no formato impresso (papel) ou digital em aplicativo oficial.<br>
+              • <strong>Validade Vencida É ACEITA:</strong> Os documentos oficiais são aceitos <strong>mesmo com data de validade expirada</strong> (ex.: CNH ou passaporte vencidos), desde que estejam legíveis e permitam comprovar a identidade da pessoa.
+            </p>
+          </div>
+        </div>
+
+        <!-- Grade Comparativa Lado a Lado: Aceitos vs. Não Aceitos -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;">
+          
+          <!-- COLUNA VERDE: DOCUMENTOS ACEITOS -->
+          <div style="background: white; border: 2px solid var(--je-green); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-sm);">
+            <div style="background: var(--je-green); color: white; padding: 1rem 1.25rem; display: flex; align-items: center; justify-content: space-between;">
+              <div style="display: flex; align-items: center; gap: 0.6rem; font-weight: 800; font-size: 1.05rem;">
+                <i class="fa-solid fa-circle-check"></i> DOCUMENTOS ACEITOS
+              </div>
+              <span style="background: rgba(255,255,255,0.25); font-size: 0.75rem; padding: 0.2rem 0.6rem; border-radius: 20px; font-weight: 700;">HÁBEIS</span>
+            </div>
+            
+            <div style="padding: 1.25rem; display: flex; flex-direction: column; gap: 0.85rem;">
+              
+              <div style="display: flex; gap: 0.75rem; align-items: flex-start; padding: 0.6rem 0.75rem; background: var(--je-green-light); border-radius: 10px;">
+                <i class="fa-solid fa-id-card" style="color: var(--je-green); font-size: 1.2rem; margin-top: 0.2rem;"></i>
+                <div>
+                  <strong style="color: var(--je-green); font-size: 0.9rem;">1. Carteira de Identidade (RG / CIN)</strong>
+                  <div style="font-size: 0.8rem; color: var(--je-text-muted);">Carteira de Identidade tradicional ou Carteira de Identidade Nacional (física ou app oficial GOV.BR). Com ou sem nome social registrado.</div>
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 0.75rem; align-items: flex-start; padding: 0.6rem 0.75rem; background: var(--je-green-light); border-radius: 10px;">
+                <i class="fa-solid fa-id-badge" style="color: var(--je-green); font-size: 1.2rem; margin-top: 0.2rem;"></i>
+                <div>
+                  <strong style="color: var(--je-green); font-size: 0.9rem;">2. Carteira Nacional de Habilitação (CNH)</strong>
+                  <div style="font-size: 0.8rem; color: var(--je-text-muted);">Formato físico em papel ou versão digital apresentada diretamente no app oficial <em>Carteira Digital de Trânsito (CDT)</em>. Vale mesmo vencida!</div>
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 0.75rem; align-items: flex-start; padding: 0.6rem 0.75rem; background: var(--je-green-light); border-radius: 10px;">
+                <i class="fa-solid fa-mobile-screen-button" style="color: var(--je-green); font-size: 1.2rem; margin-top: 0.2rem;"></i>
+                <div>
+                  <strong style="color: var(--je-green); font-size: 0.9rem;">3. e-Título COM FOTO</strong>
+                  <div style="font-size: 0.8rem; color: var(--je-text-muted);">Aplicativo oficial da Justiça Eleitoral. <strong>Atenção:</strong> Válido para votar isoladamente <em>apenas se exibir a foto</em> cadastrada na biometria.</div>
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 0.75rem; align-items: flex-start; padding: 0.6rem 0.75rem; background: var(--je-green-light); border-radius: 10px;">
+                <i class="fa-solid fa-passport" style="color: var(--je-green); font-size: 1.2rem; margin-top: 0.2rem;"></i>
+                <div>
+                  <strong style="color: var(--je-green); font-size: 0.9rem;">4. Passaporte</strong>
+                  <div style="font-size: 0.8rem; color: var(--je-text-muted);">Passaporte brasileiro original dentro ou fora da validade, desde que com foto e dados nítidos.</div>
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 0.75rem; align-items: flex-start; padding: 0.6rem 0.75rem; background: var(--je-green-light); border-radius: 10px;">
+                <i class="fa-solid fa-user-graduate" style="color: var(--je-green); font-size: 1.2rem; margin-top: 0.2rem;"></i>
+                <div>
+                  <strong style="color: var(--je-green); font-size: 0.9rem;">5. Carteira de Categoria Profissional</strong>
+                  <div style="font-size: 0.8rem; color: var(--je-text-muted);">Emitida por órgãos ou conselhos de classe reconhecidos por lei federal (ex.: OAB, CRM, CREA, CRO, etc.), contendo foto.</div>
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 0.75rem; align-items: flex-start; padding: 0.6rem 0.75rem; background: var(--je-green-light); border-radius: 10px;">
+                <i class="fa-solid fa-person-military-rifle" style="color: var(--je-green); font-size: 1.2rem; margin-top: 0.2rem;"></i>
+                <div>
+                  <strong style="color: var(--je-green); font-size: 0.9rem;">6. Certificado de Reservista</strong>
+                  <div style="font-size: 0.8rem; color: var(--je-text-muted);">Documento militar oficial de quitação que contenha fotografia do titular.</div>
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 0.75rem; align-items: flex-start; padding: 0.6rem 0.75rem; background: var(--je-green-light); border-radius: 10px;">
+                <i class="fa-solid fa-book" style="color: var(--je-green); font-size: 1.2rem; margin-top: 0.2rem;"></i>
+                <div>
+                  <strong style="color: var(--je-green); font-size: 0.9rem;">7. Carteira de Trabalho (CTPS) — FÍSICA</strong>
+                  <div style="font-size: 0.8rem; color: var(--je-text-muted);"><strong>Somente no formato físico (livreto de papel)</strong>. A CTPS em aplicativo digital é vedada.</div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- COLUNA VERMELHA: DOCUMENTOS NÃO ACEITOS -->
+          <div style="background: white; border: 2px solid var(--je-red); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-sm);">
+            <div style="background: var(--je-red); color: white; padding: 1rem 1.25rem; display: flex; align-items: center; justify-content: space-between;">
+              <div style="display: flex; align-items: center; gap: 0.6rem; font-weight: 800; font-size: 1.05rem;">
+                <i class="fa-solid fa-circle-xmark"></i> DOCUMENTOS NÃO ACEITOS
+              </div>
+              <span style="background: rgba(255,255,255,0.25); font-size: 0.75rem; padding: 0.2rem 0.6rem; border-radius: 20px; font-weight: 700;">VEDAÇÃO EXPRESSA</span>
+            </div>
+            
+            <div style="padding: 1.25rem; display: flex; flex-direction: column; gap: 0.85rem;">
+              
+              <div style="display: flex; gap: 0.75rem; align-items: flex-start; padding: 0.6rem 0.75rem; background: #FEF2F2; border-radius: 10px; border-left: 4px solid var(--je-red);">
+                <i class="fa-solid fa-ban" style="color: var(--je-red); font-size: 1.2rem; margin-top: 0.2rem;"></i>
+                <div>
+                  <strong style="color: var(--je-red); font-size: 0.9rem;">1. Carteira de Trabalho DIGITAL (App)</strong>
+                  <div style="font-size: 0.8rem; color: var(--je-text-muted);"><strong>Pegadinha comum:</strong> O manual veda expressamente a CTPS Digital no celular. Apenas a carteira física de papel é aceita.</div>
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 0.75rem; align-items: flex-start; padding: 0.6rem 0.75rem; background: #FEF2F2; border-radius: 10px; border-left: 4px solid var(--je-red);">
+                <i class="fa-solid fa-ban" style="color: var(--je-red); font-size: 1.2rem; margin-top: 0.2rem;"></i>
+                <div>
+                  <strong style="color: var(--je-red); font-size: 0.9rem;">2. Certidão de Nascimento</strong>
+                  <div style="font-size: 0.8rem; color: var(--je-text-muted);">Não possui foto e não comprova identificação biométrica/facial perante a mesa.</div>
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 0.75rem; align-items: flex-start; padding: 0.6rem 0.75rem; background: #FEF2F2; border-radius: 10px; border-left: 4px solid var(--je-red);">
+                <i class="fa-solid fa-ban" style="color: var(--je-red); font-size: 1.2rem; margin-top: 0.2rem;"></i>
+                <div>
+                  <strong style="color: var(--je-red); font-size: 0.9rem;">3. Certidão de Casamento</strong>
+                  <div style="font-size: 0.8rem; color: var(--je-text-muted);">Não é aceita, mesmo acompanhada de cópia ou com foto colada.</div>
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 0.75rem; align-items: flex-start; padding: 0.6rem 0.75rem; background: #FEF2F2; border-radius: 10px; border-left: 4px solid var(--je-red);">
+                <i class="fa-solid fa-ban" style="color: var(--je-red); font-size: 1.2rem; margin-top: 0.2rem;"></i>
+                <div>
+                  <strong style="color: var(--je-red); font-size: 0.9rem;">4. e-Título SEM FOTO (Isolado)</strong>
+                  <div style="font-size: 0.8rem; color: var(--je-text-muted);">Se o eleitor não cadastrou biometria e o app estiver sem foto, ele <strong>obrigatoriamente</strong> deve apresentar outro documento oficial com foto.</div>
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 0.75rem; align-items: flex-start; padding: 0.6rem 0.75rem; background: #FEF2F2; border-radius: 10px; border-left: 4px solid var(--je-red);">
+                <i class="fa-solid fa-ban" style="color: var(--je-red); font-size: 1.2rem; margin-top: 0.2rem;"></i>
+                <div>
+                  <strong style="color: var(--je-red); font-size: 0.9rem;">5. Título de Eleitor de Papel (Isolado)</strong>
+                  <div style="font-size: 0.8rem; color: var(--je-text-muted);">O título impresso não possui foto. Ele serve para saber zona e seção, mas não autoriza o voto sozinho sem RG/CNH.</div>
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 0.75rem; align-items: flex-start; padding: 0.6rem 0.75rem; background: #FEF2F2; border-radius: 10px; border-left: 4px solid var(--je-red);">
+                <i class="fa-solid fa-ban" style="color: var(--je-red); font-size: 1.2rem; margin-top: 0.2rem;"></i>
+                <div>
+                  <strong style="color: var(--je-red); font-size: 0.9rem;">6. Fotos ou Prints de Documentos na Galeria</strong>
+                  <div style="font-size: 0.8rem; color: var(--je-text-muted);">Print de tela, foto salva na galeria do celular ou foto enviada por WhatsApp não têm validade jurídica; apenas apps oficiais do governo ou via física.</div>
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 0.75rem; align-items: flex-start; padding: 0.6rem 0.75rem; background: #FEF2F2; border-radius: 10px; border-left: 4px solid var(--je-red);">
+                <i class="fa-solid fa-ban" style="color: var(--je-red); font-size: 1.2rem; margin-top: 0.2rem;"></i>
+                <div>
+                  <strong style="color: var(--je-red); font-size: 0.9rem;">7. Qualquer Documento Oficial sem Foto</strong>
+                  <div style="font-size: 0.8rem; color: var(--je-text-muted);">Cartão de CPF impresso antigo sem foto, carteiras de estudante convencionais e crachás corporativos comuns.</div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Tabela de Casos Práticos de Treinamento (Simulador do Mesário) -->
+        <div style="background: white; border-radius: 14px; border: 1px solid var(--je-border); overflow: hidden;">
+          <div style="background: var(--je-blue-light); padding: 1rem 1.25rem; border-bottom: 1px solid var(--je-border); display: flex; align-items: center; justify-content: space-between;">
+            <h3 style="font-size: 1rem; font-weight: 800; color: var(--je-blue); display: flex; align-items: center; gap: 0.5rem;">
+              <i class="fa-solid fa-clipboard-question"></i> Casos Práticos do Dia da Eleição (Simulador de Decisão)
+            </h3>
+            <span style="font-size: 0.78rem; color: var(--je-text-muted); font-weight: 600;">Fixação para Instrutoria</span>
+          </div>
+          
+          <table class="styled-table" style="margin: 0;">
+            <thead>
+              <tr>
+                <th style="width: 45%;">Situação Apresentada na Seção</th>
+                <th style="width: 15%; text-align: center;">Pode Votar?</th>
+                <th style="width: 40%;">Conduta do Mesário e Justificativa Legal</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Eleitor apresenta CNH com data de validade vencida em 2022.</strong></td>
+                <td style="text-align: center;"><span class="badge-yes"><i class="fa-solid fa-check"></i> SIM</span></td>
+                <td><strong>Autorizar.</strong> O manual (pág. 10) prevê expressamente que documentos oficiais com validade expirada são aceitos, desde que permitam comprovar a identidade.</td>
+              </tr>
+              <tr>
+                <td><strong>Eleitor apresenta o aplicativo da Carteira de Trabalho Digital no celular.</strong></td>
+                <td style="text-align: center;"><span class="badge-no" style="background:#fee2e2; color:#b91c1c; font-weight:700;"><i class="fa-solid fa-xmark"></i> NÃO</span></td>
+                <td><strong>Barrar com esse documento.</strong> A CTPS digital é vedada expressamente pelo manual (pág. 10). Solicitar outro documento com foto ou a CTPS de papel.</td>
+              </tr>
+              <tr>
+                <td><strong>Eleitor apresenta o e-Título, mas o aplicativo está SEM FOTO.</strong></td>
+                <td style="text-align: center;"><span class="badge-opt"><i class="fa-solid fa-circle-exclamation"></i> CONDICIONAL</span></td>
+                <td><strong>Não vota só com ele.</strong> O mesário deve solicitar a apresentação conjunta de um documento oficial com foto (RG, CNH, Passaporte, etc.). (Pág. 10).</td>
+              </tr>
+              <tr>
+                <td><strong>Eleitor esqueceu o título e não lembra o CPF, mas trouxe a identidade (RG).</strong></td>
+                <td style="text-align: center;"><span class="badge-yes"><i class="fa-solid fa-check"></i> SIM</span></td>
+                <td><strong>Autorizar.</strong> O mesário localiza o nome do eleitor no Caderno de Votação por ordem alfabética através do documento com foto apresentado. (Pág. 18).</td>
+              </tr>
+              <tr>
+                <td><strong>Eleitor apresenta certidão de casamento e foto do RG no WhatsApp.</strong></td>
+                <td style="text-align: center;"><span class="badge-no" style="background:#fee2e2; color:#b91c1c; font-weight:700;"><i class="fa-solid fa-xmark"></i> NÃO</span></td>
+                <td><strong>Não autorizar.</strong> Certidões não são aceitas e foto de documento na galeria/WhatsApp não substitui documento oficial original ou app autenticado.</td>
+              </tr>
+              <tr>
+                <td><strong>Eleitor apresenta carteira da OAB ou CREA com foto.</strong></td>
+                <td style="text-align: center;"><span class="badge-yes"><i class="fa-solid fa-check"></i> SIM</span></td>
+                <td><strong>Autorizar.</strong> Carteiras de categoria profissional reconhecidas por lei têm fé pública e validade nacional de identificação civil. (Pág. 10).</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ABA 6: CHECKLIST PRÉ-VOTAÇÃO (ANTES DO INÍCIO DOS TRABALHOS) -->
+    <section id="tab-checklist" class="tab-pane">
+      <div class="card-box" style="padding: 2rem;">
+        
+        <!-- Cabeçalho da Aba -->
+        <div style="text-align: center; margin-bottom: 1.5rem;">
+          <h2 style="font-size: 1.35rem; font-weight: 800; color: var(--je-blue); margin-bottom: 0.4rem;">
+            <i class="fa-solid fa-list-check"></i> Checklist Pré-Votação (Antes do Início dos Trabalhos)
+          </h2>
+          <p style="font-size: 0.88rem; color: var(--je-text-muted); font-weight: 500;">
+            Conferências e Providências Obrigatórias • <strong>Manual do Mesário 2026, Págs. 4, 9, 12, 13, 14 e 15</strong>
+          </p>
+        </div>
+
+        <!-- Barra de Progresso e Ações Rápidas -->
+        <div style="background: white; border: 1px solid var(--je-border); border-radius: 14px; padding: 1.25rem 1.5rem; margin-bottom: 2rem; box-shadow: var(--shadow-sm);">
+          <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 0.75rem;">
+            <div>
+              <span style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; color: var(--je-blue); letter-spacing: 0.05em;">Progresso de Prontidão da Seção</span>
+              <div id="checklist-counter" style="font-size: 1.15rem; font-weight: 800; color: var(--je-text-main);">0 de 24 itens conferidos (0%)</div>
+            </div>
+            <div class="btn-group">
+              <button class="ctrl-btn" onclick="checkAllItems()"><i class="fa-solid fa-check-double"></i> Marcar Todos</button>
+              <button class="ctrl-btn" onclick="clearAllItems()"><i class="fa-solid fa-rotate-left"></i> Limpar</button>
+            </div>
+          </div>
+          
+          <!-- Barra Gráfica -->
+          <div style="width: 100%; height: 12px; background: #E2E8F0; border-radius: 20px; overflow: hidden;">
+            <div id="checklist-progress-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, var(--je-yellow) 0%, var(--je-green) 100%); transition: width 0.3s ease;"></div>
+          </div>
+
+          <!-- Alerta de Conclusão Dinâmico -->
+          <div id="checklist-ready-alert" style="display: none; margin-top: 1rem; background: var(--je-green-light); border: 1px solid var(--je-green); color: var(--je-green); padding: 0.75rem 1rem; border-radius: 8px; font-weight: 700; font-size: 0.9rem; text-align: center;">
+            <i class="fa-solid fa-circle-check"></i> Parabéns! Todos os itens foram conferidos. A seção está 100% apta a iniciar a votação às 08h00 (horário de Brasília)!
+          </div>
+        </div>
+
+        <!-- Grade de Etapas em 4 Blocos -->
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+
+          <!-- ETAPA 1: CONFERÊNCIA DE MATERIAIS -->
+          <div style="background: white; border-radius: 14px; border: 1px solid var(--je-border); overflow: hidden; box-shadow: var(--shadow-sm);">
+            <div style="background: linear-gradient(135deg, #0A3A60 0%, #174e7a 100%); color: white; padding: 0.9rem 1.25rem; display: flex; align-items: center; justify-content: space-between;">
+              <div style="font-weight: 800; font-size: 0.95rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fa-solid fa-box-archive"></i> ETAPA 1: CONFERÊNCIA DO MALOTE E MATERIAIS
+              </div>
+              <span style="background: rgba(255,255,255,0.2); font-size: 0.75rem; padding: 0.2rem 0.6rem; border-radius: 20px;">Manual Pág. 13</span>
+            </div>
+            <div style="padding: 1.25rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 0.75rem;">
+              
+              <label style="display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer; padding: 0.5rem; background: var(--je-gray-bg); border-radius: 8px;">
+                <input type="checkbox" class="chk-item" onchange="updateChecklistProgress()" style="width: 18px; height: 18px; margin-top: 0.15rem; cursor: pointer;">
+                <span style="font-size: 0.85rem; line-height: 1.35;"><strong>Urna eletrônica lacrada:</strong> Caixa intacta com lacres e etiquetas identificadoras.</span>
+              </label>
+
+              <label style="display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer; padding: 0.5rem; background: var(--je-gray-bg); border-radius: 8px;">
+                <input type="checkbox" class="chk-item" onchange="updateChecklistProgress()" style="width: 18px; height: 18px; margin-top: 0.15rem; cursor: pointer;">
+                <span style="font-size: 0.85rem; line-height: 1.35;"><strong>Cabina de votação:</strong> Estrutura de papelão/plástica em perfeito estado de montagem.</span>
+              </label>
+
+              <label style="display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer; padding: 0.5rem; background: var(--je-gray-bg); border-radius: 8px;">
+                <input type="checkbox" class="chk-item" onchange="updateChecklistProgress()" style="width: 18px; height: 18px; margin-top: 0.15rem; cursor: pointer;">
+                <span style="font-size: 0.85rem; line-height: 1.35;"><strong>Cadernos de Votação:</strong> Caderno da seção, seções agregadas e TTE (se houver).</span>
+              </label>
+
+              <label style="display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer; padding: 0.5rem; background: var(--je-gray-bg); border-radius: 8px;">
+                <input type="checkbox" class="chk-item" onchange="updateChecklistProgress()" style="width: 18px; height: 18px; margin-top: 0.15rem; cursor: pointer;">
+                <span style="font-size: 0.85rem; line-height: 1.35;"><strong>Formulários oficiais:</strong> Ata da Mesa Receptora, Requerimento de Justificativa (RJE) e Deficiência.</span>
+              </label>
+
+              <label style="display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer; padding: 0.5rem; background: var(--je-gray-bg); border-radius: 8px;">
+                <input type="checkbox" class="chk-item" onchange="updateChecklistProgress()" style="width: 18px; height: 18px; margin-top: 0.15rem; cursor: pointer;">
+                <span style="font-size: 0.85rem; line-height: 1.35;"><strong>Guias impressos:</strong> Manual do Mesário 2026 e Guia Rápido de consulta.</span>
+              </label>
+
+              <label style="display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer; padding: 0.5rem; background: var(--je-gray-bg); border-radius: 8px;">
+                <input type="checkbox" class="chk-item" onchange="updateChecklistProgress()" style="width: 18px; height: 18px; margin-top: 0.15rem; cursor: pointer;">
+                <span style="font-size: 0.85rem; line-height: 1.35;"><strong>Suprimentos:</strong> Canetas esferográficas, almofada de carimbo e fones descartáveis.</span>
+              </label>
+
+              <label style="display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer; padding: 0.5rem; background: var(--je-gray-bg); border-radius: 8px;">
+                <input type="checkbox" class="chk-item" onchange="updateChecklistProgress()" style="width: 18px; height: 18px; margin-top: 0.15rem; cursor: pointer;">
+                <span style="font-size: 0.85rem; line-height: 1.35;"><strong>Lacre de reposição (cor azul):</strong> Cartela com lacre reserva e embalagem da MR.</span>
+              </label>
+
+              <label style="display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer; padding: 0.5rem; background: var(--je-gray-bg); border-radius: 8px;">
+                <input type="checkbox" class="chk-item" onchange="updateChecklistProgress()" style="width: 18px; height: 18px; margin-top: 0.15rem; cursor: pointer;">
+                <span style="font-size: 0.85rem; line-height: 1.35;"><strong>Senhas & Envelopes:</strong> Senhas numéricas para fila às 17h e envelopes para a Junta.</span>
+              </label>
+
+            </div>
+          </div>
+
+          <!-- ETAPA 2: INSTALAÇÃO DA SALA E SEGURANÇA -->
+          <div style="background: white; border-radius: 14px; border: 1px solid var(--je-border); overflow: hidden; box-shadow: var(--shadow-sm);">
+            <div style="background: linear-gradient(135deg, #1B8A5A 0%, #157347 100%); color: white; padding: 0.9rem 1.25rem; display: flex; align-items: center; justify-content: space-between;">
+              <div style="font-weight: 800; font-size: 0.95rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fa-solid fa-door-open"></i> ETAPA 2: ORGANIZAÇÃO DA SALA E SEGURANÇA
+              </div>
+              <span style="background: rgba(255,255,255,0.2); font-size: 0.75rem; padding: 0.2rem 0.6rem; border-radius: 20px;">Manual Págs. 12 e 14</span>
+            </div>
+            <div style="padding: 1.25rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 0.75rem;">
+              
+              <label style="display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer; padding: 0.5rem; background: var(--je-gray-bg); border-radius: 8px;">
+                <input type="checkbox" class="chk-item" onchange="updateChecklistProgress()" style="width: 18px; height: 18px; margin-top: 0.15rem; cursor: pointer;">
+                <span style="font-size: 0.85rem; line-height: 1.35;"><strong>Conferência de dados:</strong> Confirmar se município, zona e seção da urna e dos cadernos são idênticos.</span>
+              </label>
+
+              <label style="display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer; padding: 0.5rem; background: var(--je-gray-bg); border-radius: 8px;">
+                <input type="checkbox" class="chk-item" onchange="updateChecklistProgress()" style="width: 18px; height: 18px; margin-top: 0.15rem; cursor: pointer;">
+                <span style="font-size: 0.85rem; line-height: 1.35;"><strong>Retirar a urna da caixa:</strong> Acomodar a embalagem em mesa firme e desembalar a urna com cuidado.</span>
+              </label>
+
+              <label style="display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer; padding: 0.5rem; background: var(--je-gray-bg); border-radius: 8px;">
+                <input type="checkbox" class="chk-item" onchange="updateChecklistProgress()" style="width: 18px; height: 18px; margin-top: 0.15rem; cursor: pointer;">
+                <span style="font-size: 0.85rem; line-height: 1.35;"><strong>Mesa do Presidente:</strong> Posicionar o Terminal do Mesário na mesa da Presidência voltado para o mesário.</span>
+              </label>
+
+              <label style="display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer; padding: 0.5rem; background: var(--je-gray-bg); border-radius: 8px;">
+                <input type="checkbox" class="chk-item" onchange="updateChecklistProgress()" style="width: 18px; height: 18px; margin-top: 0.15rem; cursor: pointer;">
+                <span style="font-size: 0.85rem; line-height: 1.35;"><strong>Sigilo da tela da cabina:</strong> O visor não pode estar de frente para portas, janelas, espelhos ou corredores.</span>
+              </label>
+
+              <label style="display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer; padding: 0.5rem; background: var(--je-gray-bg); border-radius: 8px;">
+                <input type="checkbox" class="chk-item" onchange="updateChecklistProgress()" style="width: 18px; height: 18px; margin-top: 0.15rem; cursor: pointer;">
+                <span style="font-size: 0.85rem; line-height: 1.35;"><strong>Traseira da urna visível:</strong> A parte de trás do terminal deve permanecer sempre no campo de visão da mesa.</span>
+              </label>
+
+              <label style="display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer; padding: 0.5rem; background: var(--je-gray-bg); border-radius: 8px;">
+                <input type="checkbox" class="chk-item" onchange="updateChecklistProgress()" style="width: 18px; height: 18px; margin-top: 0.15rem; cursor: pointer;">
+                <span style="font-size: 0.85rem; line-height: 1.35;"><strong>Bloqueio de câmeras da sala:</strong> Caso a sala possua câmeras de monitoramento, cobrir/bloquear as lentes.</span>
+              </label>
+
+              <label style="display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer; padding: 0.5rem; background: var(--je-gray-bg); border-radius: 8px;">
+                <input type="checkbox" class="chk-item" onchange="updateChecklistProgress()" style="width: 18px; height: 18px; margin-top: 0.15rem; cursor: pointer;">
+                <span style="font-size: 0.85rem; line-height: 1.35;"><strong>Mesa de apoio a celulares:</strong> Montar mesa visível para deixar celulares desligados antes de ir à cabina.</span>
+              </label>
+
+              <label style="display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer; padding: 0.5rem; background: var(--je-gray-bg); border-radius: 8px;">
+                <input type="checkbox" class="chk-item" onchange="updateChecklistProgress()" style="width: 18px; height: 18px; margin-top: 0.15rem; cursor: pointer;">
+                <span style="font-size: 0.85rem; line-height: 1.35;"><strong>Fixação dos cabos:</strong> Cabos afixados ao chão com fita para evitar quedas e permitir passagem livre de PCD.</span>
+              </label>
+
+            </div>
+          </div>
+
+          <!-- ETAPA 3: LIGAÇÃO DA URNA E TESTES TÉCNICOS -->
+          <div style="background: white; border-radius: 14px; border: 1px solid var(--je-border); overflow: hidden; box-shadow: var(--shadow-sm);">
+            <div style="background: linear-gradient(135deg, #D97706 0%, #b45309 100%); color: white; padding: 0.9rem 1.25rem; display: flex; align-items: center; justify-content: space-between;">
+              <div style="font-weight: 800; font-size: 0.95rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fa-solid fa-plug-circle-check"></i> ETAPA 3: LIGAÇÃO DA URNA E TESTES TÉCNICOS
+              </div>
+              <span style="background: rgba(255,255,255,0.2); font-size: 0.75rem; padding: 0.2rem 0.6rem; border-radius: 20px;">Manual Págs. 4 e 14</span>
+            </div>
+            <div style="padding: 1.25rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 0.75rem;">
+              
+              <label style="display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer; padding: 0.5rem; background: var(--je-gray-bg); border-radius: 8px;">
+                <input type="checkbox" class="chk-item" onchange="updateChecklistProgress()" style="width: 18px; height: 18px; margin-top: 0.15rem; cursor: pointer;">
+                <span style="font-size: 0.85rem; line-height: 1.35;"><strong>Conferir lacres físicos:</strong> Verificar se todos os lacres da urna estão íntegros, bem colados e rubricados.</span>
+              </label>
+
+              <label style="display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer; padding: 0.5rem; background: var(--je-gray-bg); border-radius: 8px;">
+                <input type="checkbox" class="chk-item" onchange="updateChecklistProgress()" style="width: 18px; height: 18px; margin-top: 0.15rem; cursor: pointer;">
+                <span style="font-size: 0.85rem; line-height: 1.35;"><strong>Conectar à tomada elétrica:</strong> Ligar o cabo de força à energia antes de ligar a chave geral.</span>
+              </label>
+
+              <label style="display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer; padding: 0.5rem; background: var(--je-gray-bg); border-radius: 8px;">
+                <input type="checkbox" class="chk-item" onchange="updateChecklistProgress()" style="width: 18px; height: 18px; margin-top: 0.15rem; cursor: pointer;">
+                <span style="font-size: 0.85rem; line-height: 1.35;"><strong>Ligar no botão:</strong> Pressionar o botão Liga/Desliga da urna e aguardar a inicialização.</span>
+              </label>
+
+              <label style="display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer; padding: 0.5rem; background: var(--je-gray-bg); border-radius: 8px;">
+                <input type="checkbox" class="chk-item" onchange="updateChecklistProgress()" style="width: 18px; height: 18px; margin-top: 0.15rem; cursor: pointer;">
+                <span style="font-size: 0.85rem; line-height: 1.35;"><strong>Verificar dados na tela:</strong> Município, zona, seção, agregadas (se houver), data/hora e se opera na tomada.</span>
+              </label>
+
+              <label style="display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer; padding: 0.5rem; background: var(--je-gray-bg); border-radius: 8px;">
+                <input type="checkbox" class="chk-item" onchange="updateChecklistProgress()" style="width: 18px; height: 18px; margin-top: 0.15rem; cursor: pointer;">
+                <span style="font-size: 0.85rem; line-height: 1.35;"><strong>Luz de Segurança Verde:</strong> Conferir luz verde contínua (na frente nos mod. 2013/15 ou atrás nos mod. 2020/22).</span>
+              </label>
+
+              <label style="display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer; padding: 0.5rem; background: var(--je-gray-bg); border-radius: 8px;">
+                <input type="checkbox" class="chk-item" onchange="updateChecklistProgress()" style="width: 18px; height: 18px; margin-top: 0.15rem; cursor: pointer;">
+                <span style="font-size: 0.85rem; line-height: 1.35;"><strong>Teste obrigatório do teclado:</strong> Executar o teste automático de teclas e anotar resultado na Ata da Mesa.</span>
+              </label>
+
+            </div>
+          </div>
+
+          <!-- ETAPA 4: ZERÉSIMA, TESTEMUNHAS E ABERTURA -->
+          <div style="background: white; border-radius: 14px; border: 1px solid var(--je-border); overflow: hidden; box-shadow: var(--shadow-sm);">
+            <div style="background: linear-gradient(135deg, #0284C7 0%, #0369a1 100%); color: white; padding: 0.9rem 1.25rem; display: flex; align-items: center; justify-content: space-between;">
+              <div style="font-weight: 800; font-size: 0.95rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fa-solid fa-print"></i> ETAPA 4: ZERÉSIMA, TESTEMUNHAS E ABERTURA
+              </div>
+              <span style="background: rgba(255,255,255,0.2); font-size: 0.75rem; padding: 0.2rem 0.6rem; border-radius: 20px;">Manual Págs. 9 e 15</span>
+            </div>
+            <div style="padding: 1.25rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 0.75rem;">
+              
+              <label style="display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer; padding: 0.5rem; background: var(--je-gray-bg); border-radius: 8px;">
+                <input type="checkbox" class="chk-item" onchange="updateChecklistProgress()" style="width: 18px; height: 18px; margin-top: 0.15rem; cursor: pointer;">
+                <span style="font-size: 0.85rem; line-height: 1.35;"><strong>Teste de Autenticidade (se sorteada):</strong> Caso sorteada na véspera, aguardar auditoria do Cartório e registrar em Ata.</span>
+              </label>
+
+              <label style="display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer; padding: 0.5rem; background: var(--je-gray-bg); border-radius: 8px;">
+                <input type="checkbox" class="chk-item" onchange="updateChecklistProgress()" style="width: 18px; height: 18px; margin-top: 0.15rem; cursor: pointer;">
+                <span style="font-size: 0.85rem; line-height: 1.35;"><strong>Convidar 2 testemunhas da fila:</strong> Chamar os 2 primeiros eleitores para acompanhar a Zerésima (registrar recusa se houver).</span>
+              </label>
+
+              <label style="display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer; padding: 0.5rem; background: var(--je-gray-bg); border-radius: 8px;">
+                <input type="checkbox" class="chk-item" onchange="updateChecklistProgress()" style="width: 18px; height: 18px; margin-top: 0.15rem; cursor: pointer;">
+                <span style="font-size: 0.85rem; line-height: 1.35;"><strong>Emissão da Zerésima & Resumo:</strong> Imprimir os documentos comprovando que não há nenhum voto computado na urna.</span>
+              </label>
+
+              <label style="display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer; padding: 0.5rem; background: var(--je-gray-bg); border-radius: 8px;">
+                <input type="checkbox" class="chk-item" onchange="updateChecklistProgress()" style="width: 18px; height: 18px; margin-top: 0.15rem; cursor: pointer;">
+                <span style="font-size: 0.85rem; line-height: 1.35;"><strong>Assinaturas obrigatórias:</strong> Presidente, mesários e fiscais de partidos presentes assinam a Zerésima e o Resumo.</span>
+              </label>
+
+              <label style="display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer; padding: 0.5rem; background: var(--je-gray-bg); border-radius: 8px;">
+                <input type="checkbox" class="chk-item" onchange="updateChecklistProgress()" style="width: 18px; height: 18px; margin-top: 0.15rem; cursor: pointer;">
+                <span style="font-size: 0.85rem; line-height: 1.35;"><strong>Afixar Resumo da Zerésima:</strong> Colar imediatamente o Resumo em local público e visível na porta da seção.</span>
+              </label>
+
+              <label style="display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer; padding: 0.5rem; background: var(--je-gray-bg); border-radius: 8px;">
+                <input type="checkbox" class="chk-item" onchange="updateChecklistProgress()" style="width: 18px; height: 18px; margin-top: 0.15rem; cursor: pointer;">
+                <span style="font-size: 0.85rem; line-height: 1.35;"><strong>Registro de presença dos mesários:</strong> Digitar títulos no terminal (opção 3) e assinar no campo da Ata física.</span>
+              </label>
+
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ABA 7: GUIA DE ASSINATURAS E RELATÓRIOS -->
+    <section id="tab-signatures" class="tab-pane">
+      <div class="card-box" style="padding: 2rem;">
+        
+        <!-- Cabeçalho da Aba -->
+        <div style="text-align: center; margin-bottom: 2rem;">
+          <h2 style="font-size: 1.35rem; font-weight: 800; color: var(--je-blue); margin-bottom: 0.4rem;">
+            <i class="fa-solid fa-file-signature"></i> 7. Guia Oficial de Assinaturas, Relatórios e Lacres
+          </h2>
+          <p style="font-size: 0.88rem; color: var(--je-text-muted); font-weight: 500;">
+            Documentos Oficiais, Eventos de Assinatura, Destinação de Vias e Regras Especiais • <strong>Manual do Mesário 2026, Págs. 14, 15, 19, 21, 23, 25, 26, 27 e 28</strong>
+          </p>
+        </div>
+
+        <!-- 4 Cards de Atenção Redobrada (Pegadinhas & Regras de Ouro) -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem; margin-bottom: 2rem;">
+          
+          <div style="background: white; border: 1px solid var(--je-border); border-top: 4px solid var(--je-yellow); border-radius: 12px; padding: 1.25rem; box-shadow: var(--shadow-sm);">
+            <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.75rem;">
+              <div style="width: 36px; height: 36px; background: var(--je-yellow-light); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #b45309; font-size: 1.1rem;">
+                <i class="fa-solid fa-fingerprint"></i>
+              </div>
+              <h4 style="font-size: 0.95rem; font-weight: 800; color: var(--je-blue);">Assinatura do Eleitor</h4>
+            </div>
+            <p style="font-size: 0.84rem; line-height: 1.45; color: var(--je-text-main); margin-bottom: 0.6rem;">
+              <strong>Regra de Ouro (Págs. 19 e 21):</strong>
+            </p>
+            <ul style="font-size: 0.82rem; line-height: 1.4; color: var(--je-text-muted); padding-left: 1rem;">
+              <li style="margin-bottom: 0.35rem;"><strong style="color: var(--je-green);">Biometria OK:</strong> <u>NÃO assina</u> o Caderno de Votação (a biometria é o registro jurídico).</li>
+              <li style="margin-bottom: 0.35rem;"><strong style="color: #b45309;">Sem biometria ou com falha (4x):</strong> <u>OBRIGATÓRIO assinar</u> a folha.</li>
+              <li><strong style="color: var(--je-blue);">Às 17h:</strong> Anotar <strong>"NC"</strong> nos faltosos.</li>
+            </ul>
+          </div>
+
+          <div style="background: white; border: 1px solid var(--je-border); border-top: 4px solid var(--je-red); border-radius: 12px; padding: 1.25rem; box-shadow: var(--shadow-sm);">
+            <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.75rem;">
+              <div style="width: 36px; height: 36px; background: #fee2e2; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--je-red); font-size: 1.1rem;">
+                <i class="fa-solid fa-scale-balanced"></i>
+              </div>
+              <h4 style="font-size: 0.95rem; font-weight: 800; color: var(--je-blue);">Fiscais de Partido</h4>
+            </div>
+            <p style="font-size: 0.84rem; line-height: 1.45; color: var(--je-text-main); margin-bottom: 0.6rem;">
+              <strong>O que assinam vs. NÃO assinam (Pág. 26):</strong>
+            </p>
+            <ul style="font-size: 0.82rem; line-height: 1.4; color: var(--je-text-muted); padding-left: 1rem;">
+              <li style="margin-bottom: 0.35rem;"><strong style="color: var(--je-green);">Assinam:</strong> Zerésima, Resumo, Ata da Seção, BU e BUJ.</li>
+              <li style="margin-bottom: 0.35rem;"><strong style="color: var(--je-red);">NÃO ASSINAM:</strong> <strong>BIM</strong> e <strong>BEHB</strong>.</li>
+              <li>Documentos internos de mesários são restritos aos membros da MRV.</li>
+            </ul>
+          </div>
+
+          <div style="background: white; border: 1px solid var(--je-border); border-top: 4px solid #0284c7; border-radius: 12px; padding: 1.25rem; box-shadow: var(--shadow-sm);">
+            <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.75rem;">
+              <div style="width: 36px; height: 36px; background: #e0f2fe; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #0284c7; font-size: 1.1rem;">
+                <i class="fa-solid fa-shield-halved"></i>
+              </div>
+              <h4 style="font-size: 0.95rem; font-weight: 800; color: var(--je-blue);">Lacre Azul da MR</h4>
+            </div>
+            <p style="font-size: 0.84rem; line-height: 1.45; color: var(--je-text-main); margin-bottom: 0.6rem;">
+              <strong>Ordem de Aplicação (Pág. 25):</strong>
+            </p>
+            <ul style="font-size: 0.82rem; line-height: 1.4; color: var(--je-text-muted); padding-left: 1rem;">
+              <li style="margin-bottom: 0.35rem;"><strong style="color: var(--je-blue);">Presidente assina na folha</strong> de adesivos <u>ANTES de descolar</u>.</li>
+              <li style="margin-bottom: 0.35rem;">Retirar a Mídia de Resultado (pendrive MR).</li>
+              <li>Colar o lacre azul sobre a tampa do compartimento da urna.</li>
+            </ul>
+          </div>
+
+          <div style="background: white; border: 1px solid var(--je-border); border-top: 4px solid var(--je-green); border-radius: 12px; padding: 1.25rem; box-shadow: var(--shadow-sm);">
+            <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.75rem;">
+              <div style="width: 36px; height: 36px; background: var(--je-green-light); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--je-green); font-size: 1.1rem;">
+                <i class="fa-solid fa-book-open"></i>
+              </div>
+              <h4 style="font-size: 0.95rem; font-weight: 800; color: var(--je-blue);">Ata da Mesa Receptora</h4>
+            </div>
+            <p style="font-size: 0.84rem; line-height: 1.45; color: var(--je-text-main); margin-bottom: 0.6rem;">
+              <strong>Documento Vivo e Contínuo (Págs. 14, 23, 27):</strong>
+            </p>
+            <ul style="font-size: 0.82rem; line-height: 1.4; color: var(--je-text-muted); padding-left: 1rem;">
+              <li style="margin-bottom: 0.35rem;"><strong>07h00 - 07h30:</strong> Abertura e registro de substituições.</li>
+              <li style="margin-bottom: 0.35rem;"><strong>Durante o dia:</strong> Fiscais assinam ao chegar; registro de acompanhantes de PCD.</li>
+              <li><strong>17h00:</strong> Fechamento e assinaturas finais.</li>
+            </ul>
+          </div>
+
+        </div>
+
+        <!-- Linha do Tempo Cronológica das Assinaturas -->
+        <div style="background: white; border: 1px solid var(--je-border); border-radius: 14px; padding: 1.5rem; margin-bottom: 2rem; box-shadow: var(--shadow-sm);">
+          <h3 style="font-size: 1.05rem; font-weight: 800; color: var(--je-blue); margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fa-solid fa-timeline" style="color: var(--je-yellow);"></i> Linha do Tempo Cronológica das Assinaturas e Relatórios
+          </h3>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+            
+            <!-- Etapa 1 -->
+            <div style="background: var(--je-gray-bg); border-radius: 12px; padding: 1.25rem; border-left: 4px solid var(--je-blue);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                <span style="font-size: 0.85rem; font-weight: 800; color: var(--je-blue); text-transform: uppercase;">1. Início dos Trabalhos</span>
+                <span style="font-size: 0.75rem; background: var(--je-blue); color: white; padding: 0.2rem 0.5rem; border-radius: 12px; font-weight: 700;">07h00 – 07h30</span>
+              </div>
+              <ul style="font-size: 0.83rem; line-height: 1.5; color: var(--je-text-main); list-style-type: disc; padding-left: 1.2rem;">
+                <li><strong>Zerésima:</strong> Presidente, mesários e fiscais presentes assinam logo após emissão.</li>
+                <li><strong>Resumo da Zerésima:</strong> Assinado e afixado <u>obrigatoriamente na porta da seção</u>.</li>
+                <li><strong>Abertura da Ata:</strong> Registro de presença/substituição de mesários e assinatura dos membros.</li>
+                <li><strong>Presença dos Mesários no Terminal:</strong> Digitação dos títulos (Opção 3 do menu).</li>
+              </ul>
+            </div>
+
+            <!-- Etapa 2 -->
+            <div style="background: var(--je-gray-bg); border-radius: 12px; padding: 1.25rem; border-left: 4px solid var(--je-yellow);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                <span style="font-size: 0.85rem; font-weight: 800; color: #b45309; text-transform: uppercase;">2. Período de Votação</span>
+                <span style="font-size: 0.75rem; background: var(--je-yellow); color: var(--je-blue-dark); padding: 0.2rem 0.5rem; border-radius: 12px; font-weight: 700;">08h00 – 17h00</span>
+              </div>
+              <ul style="font-size: 0.83rem; line-height: 1.5; color: var(--je-text-main); list-style-type: disc; padding-left: 1.2rem;">
+                <li><strong>Caderno de Votação:</strong> Assinatura <u>apenas</u> de eleitores sem biometria ou com falha biométrica.</li>
+                <li><strong>Fiscais de Partido:</strong> Devem assinar a Ata da Seção ao comparecerem durante o dia.</li>
+                <li><strong>Acompanhante de PCD:</strong> Mesário registra na Ata nome, documento e qualificação do acompanhante.</li>
+                <li><strong>Formulário PCD:</strong> Preenchido e assinado caso eleitor queira atualizar situação cadastral.</li>
+              </ul>
+            </div>
+
+            <!-- Etapa 3 -->
+            <div style="background: var(--je-gray-bg); border-radius: 12px; padding: 1.25rem; border-left: 4px solid var(--je-green);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                <span style="font-size: 0.85rem; font-weight: 800; color: var(--je-green); text-transform: uppercase;">3. Encerramento da Votação</span>
+                <span style="font-size: 0.75rem; background: var(--je-green); color: white; padding: 0.2rem 0.5rem; border-radius: 12px; font-weight: 700;">A partir das 17h00</span>
+              </div>
+              <ul style="font-size: 0.83rem; line-height: 1.5; color: var(--je-text-main); list-style-type: disc; padding-left: 1.2rem;">
+                <li><strong>"NC" no Caderno:</strong> Mesário anota "NC" em todos os eleitores ausentes.</li>
+                <li><strong>Boletins de Urna (BUs):</strong> Assinados por presidente, mesários e fiscais. <u>1 via na porta</u>.</li>
+                <li><strong>BUJ (Justificativas):</strong> Assinado por mesários e fiscais presentes.</li>
+                <li><strong>BIM e BEHB:</strong> Assinados <u>exclusivamente</u> pelos mesários (sem fiscais).</li>
+                <li><strong>Lacre Azul:</strong> Presidente rubrica na cartela antes e cola no compartimento da MR.</li>
+                <li><strong>Fechamento da Ata:</strong> Assinatura final de todos os presentes.</li>
+              </ul>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Barra de Filtros da Tabela Mestre -->
+        <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1rem;">
+          <div style="font-size: 0.95rem; font-weight: 700; color: var(--je-blue);">
+            <i class="fa-solid fa-filter"></i> Filtrar Tabela de Documentos:
+          </div>
+          <div class="btn-group" style="flex-wrap: wrap;">
+            <button class="ctrl-btn active" id="btn-filter-all" onclick="filterDocs('all')"><i class="fa-solid fa-list"></i> Todos (10)</button>
+            <button class="ctrl-btn" id="btn-filter-eleitor" onclick="filterDocs('eleitor')"><i class="fa-solid fa-user"></i> Eleitor</button>
+            <button class="ctrl-btn" id="btn-filter-presidente" onclick="filterDocs('presidente')"><i class="fa-solid fa-user-tie"></i> Presidente</button>
+            <button class="ctrl-btn" id="btn-filter-fiscais" onclick="filterDocs('fiscais')"><i class="fa-solid fa-users-viewfinder"></i> Fiscais de Partido</button>
+            <button class="ctrl-btn" id="btn-filter-exclusivo" onclick="filterDocs('exclusivo')"><i class="fa-solid fa-lock"></i> Exclusivo Mesários</button>
+          </div>
+        </div>
+
+        <!-- Tabela Mestre de Documentos, Assinaturas e Relatórios -->
+        <div class="table-container" style="margin-bottom: 2.5rem;">
+          <table class="styled-table" id="table-signatures">
+            <thead>
+              <tr>
+                <th style="min-width: 170px;">Documento / Evento</th>
+                <th style="min-width: 130px;">Momento / Horário</th>
+                <th style="min-width: 170px;">Quem Assina</th>
+                <th style="min-width: 150px;">Fiscais Assinam?</th>
+                <th style="min-width: 200px;">Destinação / Onde Fica</th>
+                <th style="min-width: 90px; text-align: center;">Ref. Manual</th>
+              </tr>
+            </thead>
+            <tbody>
+              
+              <!-- 1. Zerésima -->
+              <tr data-category="presidente mesarios fiscais">
+                <td>
+                  <strong>Zerésima</strong><br>
+                  <span style="font-size: 0.78rem; color: var(--je-text-muted);">Comprova zero votos na urna antes de abrir</span>
+                </td>
+                <td>07h00 (após teste do teclado)</td>
+                <td>
+                  <span class="badge-yes" style="font-size: 0.75rem; margin-bottom: 0.2rem;"><i class="fa-solid fa-user-tie"></i> Presidente</span>
+                  <span class="badge-yes" style="font-size: 0.75rem;"><i class="fa-solid fa-users"></i> Mesários</span>
+                </td>
+                <td>
+                  <span class="badge-yes" style="font-size: 0.75rem;"><i class="fa-solid fa-check"></i> SIM, se presentes</span>
+                </td>
+                <td>Envelope de Documentos da Seção (entregue à Junta Eleitoral).</td>
+                <td style="text-align: center;"><span class="badge-opt" style="font-size: 0.75rem;">Págs. 14, 15</span></td>
+              </tr>
+
+              <!-- 2. Resumo da Zerésima -->
+              <tr data-category="presidente mesarios fiscais">
+                <td>
+                  <strong>Resumo da Zerésima</strong><br>
+                  <span style="font-size: 0.78rem; color: var(--je-text-muted);">Extrato resumido para publicidade externa</span>
+                </td>
+                <td>07h00 (junto com a Zerésima)</td>
+                <td>
+                  <span class="badge-yes" style="font-size: 0.75rem; margin-bottom: 0.2rem;"><i class="fa-solid fa-user-tie"></i> Presidente</span>
+                  <span class="badge-yes" style="font-size: 0.75rem;"><i class="fa-solid fa-users"></i> Mesários</span>
+                </td>
+                <td>
+                  <span class="badge-yes" style="font-size: 0.75rem;"><i class="fa-solid fa-check"></i> SIM, se presentes</span>
+                </td>
+                <td><strong style="color: var(--je-blue);">Afixado na porta da seção</strong> em local visível ao público.</td>
+                <td style="text-align: center;"><span class="badge-opt" style="font-size: 0.75rem;">Pág. 15</span></td>
+              </tr>
+
+              <!-- 3. Ata da Mesa Receptora -->
+              <tr data-category="presidente mesarios fiscais">
+                <td>
+                  <strong>Ata da Mesa Receptora</strong><br>
+                  <span style="font-size: 0.78rem; color: var(--je-text-muted);">Diário oficial da seção eleitoral</span>
+                </td>
+                <td>07h00, durante o dia e às 17h00</td>
+                <td>
+                  <span class="badge-yes" style="font-size: 0.75rem; margin-bottom: 0.2rem;"><i class="fa-solid fa-user-tie"></i> Presidente</span>
+                  <span class="badge-yes" style="font-size: 0.75rem;"><i class="fa-solid fa-users"></i> Todos os Mesários</span>
+                </td>
+                <td>
+                  <span class="badge-yes" style="font-size: 0.75rem;"><i class="fa-solid fa-check"></i> SIM, na chegada e no fim</span>
+                </td>
+                <td>Envelope de Atas e Documentos para a Junta Eleitoral.</td>
+                <td style="text-align: center;"><span class="badge-opt" style="font-size: 0.75rem;">Págs. 14, 23, 27</span></td>
+              </tr>
+
+              <!-- 4. Caderno de Votação (Folha de Votação) -->
+              <tr data-category="eleitor mesarios">
+                <td>
+                  <strong>Caderno de Votação (Folha de Votação)</strong><br>
+                  <span style="font-size: 0.78rem; color: var(--je-text-muted);">Lista oficial de eleitores da seção</span>
+                </td>
+                <td>08h00 às 17h00 (Fluxo contínuo)</td>
+                <td>
+                  <span class="badge-opt" style="font-size: 0.75rem; display: block; margin-bottom: 0.25rem;">
+                    <i class="fa-solid fa-user-check"></i> <strong>Eleitor SEM biometria</strong>
+                  </span>
+                  <span class="badge-opt" style="font-size: 0.75rem; display: block; margin-bottom: 0.25rem;">
+                    <i class="fa-solid fa-triangle-exclamation"></i> <strong>Eleitor com falha (4x)</strong>
+                  </span>
+                  <span class="badge-no" style="font-size: 0.75rem; background:#fee2e2; color:#991b1b; display: block;">
+                    <i class="fa-solid fa-ban"></i> <strong>Biometria OK: NÃO ASSINA</strong>
+                  </span>
+                </td>
+                <td>
+                  <span class="badge-no" style="font-size: 0.75rem;"><i class="fa-solid fa-xmark"></i> NÃO (fiscal não assina)</span>
+                </td>
+                <td>Devolvido no malote de materiais à Justiça Eleitoral. Às 17h, mesário anota <strong>"NC"</strong> nos faltosos.</td>
+                <td style="text-align: center;"><span class="badge-opt" style="font-size: 0.75rem;">Págs. 19, 21, 27</span></td>
+              </tr>
+
+              <!-- 5. Boletim de Urna (BU) -->
+              <tr data-category="presidente mesarios fiscais">
+                <td>
+                  <strong>Boletim de Urna (BU)</strong><br>
+                  <span style="font-size: 0.78rem; color: var(--je-text-muted);">Resultado da votação (mínimo 5 vias)</span>
+                </td>
+                <td>A partir das 17h00 (Encerramento)</td>
+                <td>
+                  <span class="badge-yes" style="font-size: 0.75rem; margin-bottom: 0.2rem;"><i class="fa-solid fa-user-tie"></i> Presidente</span>
+                  <span class="badge-yes" style="font-size: 0.75rem;"><i class="fa-solid fa-users"></i> Mesários</span>
+                </td>
+                <td>
+                  <span class="badge-yes" style="font-size: 0.75rem;"><i class="fa-solid fa-check"></i> SIM (recebem 1 via p/ partido)</span>
+                </td>
+                <td>
+                  • <strong>1ª via:</strong> Afixada na porta da seção;<br>
+                  • <strong>2ª via:</strong> Envelope com a MR p/ Junta;<br>
+                  • <strong>3ª via:</strong> Anexada à Ata da Mesa;<br>
+                  • <strong>Demais vias:</strong> Fiscais e Presidente.
+                </td>
+                <td style="text-align: center;"><span class="badge-opt" style="font-size: 0.75rem;">Págs. 26, 27, 28</span></td>
+              </tr>
+
+              <!-- 6. Boletim de Justificativa (BUJ) -->
+              <tr data-category="presidente mesarios fiscais">
+                <td>
+                  <strong>Boletim de Justificativa (BUJ)</strong><br>
+                  <span style="font-size: 0.78rem; color: var(--je-text-muted);">Relatório de justificativas digitadas na urna</span>
+                </td>
+                <td>A partir das 17h00 (com o BU)</td>
+                <td>
+                  <span class="badge-yes" style="font-size: 0.75rem; margin-bottom: 0.2rem;"><i class="fa-solid fa-user-tie"></i> Presidente</span>
+                  <span class="badge-yes" style="font-size: 0.75rem;"><i class="fa-solid fa-users"></i> Mesários</span>
+                </td>
+                <td>
+                  <span class="badge-yes" style="font-size: 0.75rem;"><i class="fa-solid fa-check"></i> SIM, se presentes</span>
+                </td>
+                <td>Envelope de Documentos da Seção para a Junta Eleitoral.</td>
+                <td style="text-align: center;"><span class="badge-opt" style="font-size: 0.75rem;">Págs. 26, 28</span></td>
+              </tr>
+
+              <!-- 7. Boletim de Identificação de Mesário (BIM) -->
+              <tr data-category="presidente mesarios exclusivo">
+                <td>
+                  <strong>Boletim de Identificação de Mesário (BIM)</strong><br>
+                  <span style="font-size: 0.78rem; color: var(--je-text-muted);">Comprovante de atuação da equipe</span>
+                </td>
+                <td>A partir das 17h00</td>
+                <td>
+                  <span class="badge-yes" style="font-size: 0.75rem; margin-bottom: 0.2rem;"><i class="fa-solid fa-user-tie"></i> Presidente</span>
+                  <span class="badge-yes" style="font-size: 0.75rem;"><i class="fa-solid fa-users"></i> Mesários Presentes</span>
+                </td>
+                <td>
+                  <span class="badge-no" style="background:#fee2e2; color:#991b1b; font-size: 0.75rem; font-weight: 700;">
+                    <i class="fa-solid fa-ban"></i> NÃO! FISCAIS NÃO ASSINAM
+                  </span>
+                </td>
+                <td>Envelope de Documentos da Seção (serve para emissão dos certificados e folgas dos mesários).</td>
+                <td style="text-align: center;"><span class="badge-opt" style="font-size: 0.75rem;">Pág. 26</span></td>
+              </tr>
+
+              <!-- 8. Boletim de Emissão de Hora Certa (BEHB) -->
+              <tr data-category="presidente mesarios exclusivo">
+                <td>
+                  <strong>Boletim de Emissão de Hora Certa (BEHB)</strong><br>
+                  <span style="font-size: 0.78rem; color: var(--je-text-muted);">Relatório técnico de sincronismo do relógio</span>
+                </td>
+                <td>A partir das 17h00 (quando emitido)</td>
+                <td>
+                  <span class="badge-yes" style="font-size: 0.75rem; margin-bottom: 0.2rem;"><i class="fa-solid fa-user-tie"></i> Presidente</span>
+                  <span class="badge-yes" style="font-size: 0.75rem;"><i class="fa-solid fa-users"></i> Mesários</span>
+                </td>
+                <td>
+                  <span class="badge-no" style="background:#fee2e2; color:#991b1b; font-size: 0.75rem; font-weight: 700;">
+                    <i class="fa-solid fa-ban"></i> NÃO! FISCAIS NÃO ASSINAM
+                  </span>
+                </td>
+                <td>Envelope de Documentos da Seção.</td>
+                <td style="text-align: center;"><span class="badge-opt" style="font-size: 0.75rem;">Pág. 26</span></td>
+              </tr>
+
+              <!-- 9. Lacre Azul de Reposição da MR -->
+              <tr data-category="presidente exclusivo">
+                <td>
+                  <strong>Lacre Azul de Reposição da MR</strong><br>
+                  <span style="font-size: 0.78rem; color: var(--je-text-muted);">Segurança física do compartimento da urna</span>
+                </td>
+                <td>Após retirar a Mídia de Resultado (MR)</td>
+                <td>
+                  <span class="badge-yes" style="font-size: 0.75rem;"><i class="fa-solid fa-user-tie"></i> <strong>Exclusivo do Presidente</strong></span>
+                </td>
+                <td>
+                  <span class="badge-no" style="font-size: 0.75rem;"><i class="fa-solid fa-xmark"></i> NÃO (apenas o Presidente)</span>
+                </td>
+                <td>
+                  <strong>Colado na Urna Eletrônica</strong> sobre a tampa do compartimento da MR. <em>(Presidente rubrica na folha ANTES de descolar)</em>.
+                </td>
+                <td style="text-align: center;"><span class="badge-opt" style="font-size: 0.75rem;">Pág. 25</span></td>
+              </tr>
+
+              <!-- 10. Formulário de Eleitor com Deficiência -->
+              <tr data-category="eleitor mesarios">
+                <td>
+                  <strong>Formulário de Identificação PCD</strong><br>
+                  <span style="font-size: 0.78rem; color: var(--je-text-muted);">Atualização cadastral do eleitor com deficiência</span>
+                </td>
+                <td>Durante a votação (a pedido do eleitor)</td>
+                <td>
+                  <span class="badge-yes" style="font-size: 0.75rem; margin-bottom: 0.2rem;"><i class="fa-solid fa-wheelchair"></i> Eleitor PCD</span>
+                  <span class="badge-yes" style="font-size: 0.75rem;"><i class="fa-solid fa-users"></i> Mesário que acolheu</span>
+                </td>
+                <td>
+                  <span class="badge-no" style="font-size: 0.75rem;"><i class="fa-solid fa-xmark"></i> NÃO</span>
+                </td>
+                <td>Envelope de Documentos da Seção para atualização do cadastro no Cartório Eleitoral.</td>
+                <td style="text-align: center;"><span class="badge-opt" style="font-size: 0.75rem;">Págs. 20, 23</span></td>
+              </tr>
+
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Mini-Quiz Interativo de Fixação para Treinamento -->
+        <div style="background: white; border: 1px solid var(--je-border); border-radius: 14px; padding: 1.75rem; box-shadow: var(--shadow-sm);">
+          <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1.25rem;">
+            <div style="width: 38px; height: 38px; background: var(--je-yellow-light); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #b45309; font-size: 1.2rem;">
+              <i class="fa-solid fa-circle-question"></i>
+            </div>
+            <div>
+              <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--je-blue);">Simulador Rápido de Fixação (Instrutoria de Mesários)</h3>
+              <p style="font-size: 0.82rem; color: var(--je-text-muted);">Teste o conhecimento da equipe nas regras cruciais de assinaturas e relatórios.</p>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem;">
+            
+            <!-- Questão 1 -->
+            <div style="background: var(--je-gray-bg); border-radius: 10px; padding: 1rem; border: 1px solid var(--je-border);">
+              <span style="font-size: 0.75rem; font-weight: 700; color: var(--je-blue); text-transform: uppercase;">Questão 1</span>
+              <p style="font-size: 0.85rem; font-weight: 600; margin: 0.4rem 0 0.8rem; color: var(--je-text-main);">
+                O eleitor teve a biometria validada com sucesso no terminal. Ele deve assinar o Caderno de Votação?
+              </p>
+              <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+                <button class="ctrl-btn" onclick="answerQuiz(1, false, this)" style="flex: 1; justify-content: center;">Sim, sempre</button>
+                <button class="ctrl-btn" onclick="answerQuiz(1, true, this)" style="flex: 1; justify-content: center;">Não, dispensado</button>
+              </div>
+              <div id="quiz-feedback-1" style="display: none; font-size: 0.8rem; padding: 0.5rem; border-radius: 6px;"></div>
+            </div>
+
+            <!-- Questão 2 -->
+            <div style="background: var(--je-gray-bg); border-radius: 10px; padding: 1rem; border: 1px solid var(--je-border);">
+              <span style="font-size: 0.75rem; font-weight: 700; color: var(--je-blue); text-transform: uppercase;">Questão 2</span>
+              <p style="font-size: 0.85rem; font-weight: 600; margin: 0.4rem 0 0.8rem; color: var(--je-text-main);">
+                Fiscais de partido presentes às 17h exigem assinar o BIM (Boletim de Identificação de Mesário). O que fazer?
+              </p>
+              <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+                <button class="ctrl-btn" onclick="answerQuiz(2, false, this)" style="flex: 1; justify-content: center;">Permitir assinar</button>
+                <button class="ctrl-btn" onclick="answerQuiz(2, true, this)" style="flex: 1; justify-content: center;">Negar educadamente</button>
+              </div>
+              <div id="quiz-feedback-2" style="display: none; font-size: 0.8rem; padding: 0.5rem; border-radius: 6px;"></div>
+            </div>
+
+            <!-- Questão 3 -->
+            <div style="background: var(--je-gray-bg); border-radius: 10px; padding: 1rem; border: 1px solid var(--je-border);">
+              <span style="font-size: 0.75rem; font-weight: 700; color: var(--je-blue); text-transform: uppercase;">Questão 3</span>
+              <p style="font-size: 0.85rem; font-weight: 600; margin: 0.4rem 0 0.8rem; color: var(--je-text-main);">
+                Qual o momento exato em que o Presidente assina/rubrica o Lacre Azul de reposição da MR?
+              </p>
+              <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+                <button class="ctrl-btn" onclick="answerQuiz(3, true, this)" style="flex: 1; justify-content: center;">Na folha antes</button>
+                <button class="ctrl-btn" onclick="answerQuiz(3, false, this)" style="flex: 1; justify-content: center;">Após colar na urna</button>
+              </div>
+              <div id="quiz-feedback-3" style="display: none; font-size: 0.8rem; padding: 0.5rem; border-radius: 6px;"></div>
+            </div>
+
+            <!-- Questão 4 -->
+            <div style="background: var(--je-gray-bg); border-radius: 10px; padding: 1rem; border: 1px solid var(--je-border);">
+              <span style="font-size: 0.75rem; font-weight: 700; color: var(--je-blue); text-transform: uppercase;">Questão 4</span>
+              <p style="font-size: 0.85rem; font-weight: 600; margin: 0.4rem 0 0.8rem; color: var(--je-text-main);">
+                Onde deve ser fixada a 1ª via do Boletim de Urna (BU) e o Resumo da Zerésima?
+              </p>
+              <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+                <button class="ctrl-btn" onclick="answerQuiz(4, true, this)" style="flex: 1; justify-content: center;">Na porta da seção</button>
+                <button class="ctrl-btn" onclick="answerQuiz(4, false, this)" style="flex: 1; justify-content: center;">No malote lacrado</button>
+              </div>
+              <div id="quiz-feedback-4" style="display: none; font-size: 0.8rem; padding: 0.5rem; border-radius: 6px;"></div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ABA 8: CATÁLOGO DE OCORRÊNCIAS EM ATA -->
+    <section id="tab-occurrences" class="tab-pane">
+      <div class="card-box" style="padding: 2rem;">
+        
+        <!-- Cabeçalho da Aba -->
+        <div style="text-align: center; margin-bottom: 2rem;">
+          <h2 style="font-size: 1.35rem; font-weight: 800; color: var(--je-blue); margin-bottom: 0.4rem;">
+            <i class="fa-solid fa-clipboard-list"></i> 8. Catálogo Completo de Ocorrências em Ata
+          </h2>
+          <p style="font-size: 0.88rem; color: var(--je-text-muted); font-weight: 500;">
+            Eventos que Devem Ser Obrigatoriamente Registrados no Verso da Ata da Seção • <strong>Manual do Mesário 2026, Pág. 32 (e Págs. 8, 11, 14, 15, 20, 21, 22, 23, 27, 28, 29, 30, 31)</strong>
+          </p>
+        </div>
+
+        <!-- Orientações Gerais do TSE sobre Preenchimento da Ata -->
+        <div style="background: white; border: 1px solid var(--je-border); border-left: 5px solid var(--je-blue); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 2rem; box-shadow: var(--shadow-sm);">
+          <h4 style="font-size: 0.95rem; font-weight: 800; color: var(--je-blue); margin-bottom: 0.6rem; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fa-solid fa-circle-info"></i> Diretrizes Oficiais para o Registro no Verso da Ata (Pág. 32)
+          </h4>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; font-size: 0.84rem; line-height: 1.45; color: var(--je-text-main);">
+            <div>
+              <strong style="color: var(--je-blue);"><i class="fa-solid fa-clock"></i> Horário Exato:</strong>
+              <p style="color: var(--je-text-muted);">Todas as ocorrências devem ser registradas com o horário exato em que ocorreram.</p>
+            </div>
+            <div>
+              <strong style="color: var(--je-blue);"><i class="fa-solid fa-id-card"></i> Identificação Completa:</strong>
+              <p style="color: var(--je-text-muted);">Constar sempre nome completo e número do documento (CPF, RG ou Título) das pessoas envolvidas.</p>
+            </div>
+            <div>
+              <strong style="color: var(--je-blue);"><i class="fa-solid fa-pen-fancy"></i> Rasuras ou Emendas:</strong>
+              <p style="color: var(--je-text-muted);">No rodapé da Ata, assinalar obrigatoriamente se houve rasuras/emendas e indicar as linhas/campos.</p>
+            </div>
+            <div>
+              <strong style="color: var(--je-blue);"><i class="fa-solid fa-signature"></i> Validação Final:</strong>
+              <p style="color: var(--je-text-muted);">Assinatura do Presidente da Mesa e do responsável pelo preenchimento da Ata.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filtros das 6 Categorias Oficiais -->
+        <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.5rem;">
+          <div style="font-size: 0.95rem; font-weight: 700; color: var(--je-blue);">
+            <i class="fa-solid fa-filter"></i> Filtrar Ocorrências por Categoria:
+          </div>
+          <div class="btn-group" style="flex-wrap: wrap;">
+            <button class="ctrl-btn active" id="btn-cat-all" onclick="filterOccurrences('all')"><i class="fa-solid fa-list"></i> Todas (25)</button>
+            <button class="ctrl-btn" id="btn-cat-votacao" onclick="filterOccurrences('votacao')"><i class="fa-solid fa-check-to-slot"></i> 1. Votação</button>
+            <button class="ctrl-btn" id="btn-cat-eleitor" onclick="filterOccurrences('eleitor')"><i class="fa-solid fa-user"></i> 2. Eleitor(a)</button>
+            <button class="ctrl-btn" id="btn-cat-mesario" onclick="filterOccurrences('mesario')"><i class="fa-solid fa-user-group"></i> 3. Mesários</button>
+            <button class="ctrl-btn" id="btn-cat-fiscais" onclick="filterOccurrences('fiscais')"><i class="fa-solid fa-users-viewfinder"></i> 4. Fiscais</button>
+            <button class="ctrl-btn" id="btn-cat-urna" onclick="filterOccurrences('urna')"><i class="fa-solid fa-desktop"></i> 5. Urna</button>
+            <button class="ctrl-btn" id="btn-cat-cedula" onclick="filterOccurrences('cedula')"><i class="fa-solid fa-box"></i> 6. Cédula/Lona</button>
+          </div>
+        </div>
+
+        <!-- Lista de Ocorrências com Modelos Prontos de Texto -->
+        <div id="occurrences-container" style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem;">
+          
+          <!-- GRUPO 1: VOTAÇÃO OU JUSTIFICATIVA -->
+          <div class="occ-card" data-cat="votacao" style="background: white; border: 1px solid var(--je-border); border-radius: 12px; padding: 1.25rem; box-shadow: var(--shadow-sm);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 0.5rem;">
+              <div>
+                <span class="badge-opt" style="font-size: 0.72rem; text-transform: uppercase;">Item 1.1 • Votação ou Justificativa</span>
+                <h4 style="font-size: 0.98rem; font-weight: 800; color: var(--je-blue); margin-top: 0.2rem;">Atraso no início ou encerramento da votação ou justificativa</h4>
+              </div>
+              <span class="badge-yes" style="font-size: 0.72rem; white-space: nowrap;">Pág. 32</span>
+            </div>
+            <p style="font-size: 0.84rem; color: var(--je-text-main); margin-bottom: 0.5rem;"><strong>Quando ocorre:</strong> Abertura após as 08h00 ou encerramento postergado por fila ou falha técnica. Deve indicar o motivo e providências adotadas.</p>
+            <div style="background: var(--je-gray-bg); border-left: 3px solid var(--je-blue); border-radius: 6px; padding: 0.75rem; font-size: 0.82rem; font-family: monospace; color: var(--je-blue-dark);">
+              <strong>Exemplo de anotação na Ata:</strong><br>
+              "Às 08h20, deu-se início aos trabalhos de votação com 20 minutos de atraso devido à substituição do mesário faltoso e novo teste de teclado. Providências: mesa recomposta e fila devidamente orientada."
+            </div>
+          </div>
+
+          <!-- GRUPO 2: ELEITORA OU ELEITOR (11 ITENS) -->
+          <div class="occ-card" data-cat="eleitor" style="background: white; border: 1px solid var(--je-border); border-radius: 12px; padding: 1.25rem; box-shadow: var(--shadow-sm);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 0.5rem;">
+              <div>
+                <span class="badge-opt" style="font-size: 0.72rem; text-transform: uppercase;">Item 2.1 • Eleitora ou Eleitor</span>
+                <h4 style="font-size: 0.98rem; font-weight: 800; color: var(--je-blue); margin-top: 0.2rem;">Duas primeiras pessoas da fila para acompanhar a emissão da Zerésima</h4>
+              </div>
+              <span class="badge-yes" style="font-size: 0.72rem; white-space: nowrap;">Págs. 14, 15, 32</span>
+            </div>
+            <p style="font-size: 0.84rem; color: var(--je-text-main); margin-bottom: 0.5rem;"><strong>Quando ocorre:</strong> Às 07h00. A participação não é obrigatória, mas a aceitação ou eventual recusa deve constar em ata.</p>
+            <div style="background: var(--je-gray-bg); border-left: 3px solid var(--je-blue); border-radius: 6px; padding: 0.75rem; font-size: 0.82rem; font-family: monospace; color: var(--je-blue-dark);">
+              <strong>Exemplo de anotação na Ata:</strong><br>
+              "Às 07h05, convidou-se os dois primeiros eleitores da fila, Sr. [Nome], CPF nº [...], e Sra. [Nome], CPF nº [...], que acompanharam a emissão da Zerésima e assinaram o relatório impresso." <em>(Ou: "...o primeiro eleitor da fila recusou-se a acompanhar, sendo convidado o seguinte")</em>.
+            </div>
+          </div>
+
+          <div class="occ-card" data-cat="eleitor" style="background: white; border: 1px solid var(--je-border); border-radius: 12px; padding: 1.25rem; box-shadow: var(--shadow-sm);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 0.5rem;">
+              <div>
+                <span class="badge-opt" style="font-size: 0.72rem; text-transform: uppercase;">Item 2.2 • Eleitora ou Eleitor</span>
+                <h4 style="font-size: 0.98rem; font-weight: 800; color: var(--je-blue); margin-top: 0.2rem;">Recusa de eleitor a votar ou incapacidade de concluir a votação</h4>
+              </div>
+              <span class="badge-yes" style="font-size: 0.72rem; white-space: nowrap;">Págs. 22, 32</span>
+            </div>
+            <p style="font-size: 0.84rem; color: var(--je-text-main); margin-bottom: 0.5rem;"><strong>Quando ocorre:</strong> Eleitor habilitado na urna que desiste, passa mal ou se retira da cabina sem confirmar todos os votos (Suspensão da Votação).</p>
+            <div style="background: var(--je-gray-bg); border-left: 3px solid var(--je-blue); border-radius: 6px; padding: 0.75rem; font-size: 0.82rem; font-family: monospace; color: var(--je-blue-dark);">
+              <strong>Exemplo de anotação na Ata:</strong><br>
+              "Às 10h15, o eleitor [Nome], título nº [...], foi devidamente habilitado mas recusou-se a concluir a votação, retirando-se da cabina. Foi realizado o procedimento de suspensão de voto na urna (código de mesário) com retenção do comprovante."
+            </div>
+          </div>
+
+          <div class="occ-card" data-cat="eleitor" style="background: white; border: 1px solid var(--je-border); border-radius: 12px; padding: 1.25rem; box-shadow: var(--shadow-sm);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 0.5rem;">
+              <div>
+                <span class="badge-opt" style="font-size: 0.72rem; text-transform: uppercase;">Item 2.3 & 2.4 • Eleitora ou Eleitor</span>
+                <h4 style="font-size: 0.98rem; font-weight: 800; color: var(--je-blue); margin-top: 0.2rem;">Eleitor que votou sem constar no Caderno / Eleitor da seção que não votou por falta de dados na urna</h4>
+              </div>
+              <span class="badge-yes" style="font-size: 0.72rem; white-space: nowrap;">Pág. 32</span>
+            </div>
+            <p style="font-size: 0.84rem; color: var(--je-text-main); margin-bottom: 0.5rem;"><strong>Quando ocorre:</strong> Divergência técnica entre o cadastro da urna e o caderno de papel impresso.</p>
+            <div style="background: var(--je-gray-bg); border-left: 3px solid var(--je-blue); border-radius: 6px; padding: 0.75rem; font-size: 0.82rem; font-family: monospace; color: var(--je-blue-dark);">
+              <strong>Exemplo de anotação na Ata:</strong><br>
+              "Às 11h40, a eleitora [Nome], título nº [...], habilitada pela urna com dados regulares, não constava na listagem impressa do Caderno de Votação. Voto concluído e ocorrência lançada para atualização da JE."
+            </div>
+          </div>
+
+          <div class="occ-card" data-cat="eleitor" style="background: white; border: 1px solid var(--je-border); border-radius: 12px; padding: 1.25rem; box-shadow: var(--shadow-sm);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 0.5rem;">
+              <div>
+                <span class="badge-opt" style="font-size: 0.72rem; text-transform: uppercase;">Item 2.5 • Eleitora ou Eleitor</span>
+                <h4 style="font-size: 0.98rem; font-weight: 800; color: var(--je-blue); margin-top: 0.2rem;">Questionamentos sobre a identidade do eleitor e providências adotadas</h4>
+              </div>
+              <span class="badge-yes" style="font-size: 0.72rem; white-space: nowrap;">Págs. 11, 32</span>
+            </div>
+            <p style="font-size: 0.84rem; color: var(--je-text-main); margin-bottom: 0.5rem;"><strong>Quando ocorre:</strong> Dúvida por parte da mesa ou impugnação formal apresentada por fiscal sobre a identidade da pessoa.</p>
+            <div style="background: var(--je-gray-bg); border-left: 3px solid var(--je-blue); border-radius: 6px; padding: 0.75rem; font-size: 0.82rem; font-family: monospace; color: var(--je-blue-dark);">
+              <strong>Exemplo de anotação na Ata:</strong><br>
+              "Às 14h10, o fiscal do partido [Sigla] impugnou a identidade do eleitor [Nome]. O Presidente solicitou documento oficial complementar com foto e conferiu os dados com o título. Identidade confirmada, impugnação indeferida e voto liberado."
+            </div>
+          </div>
+
+          <div class="occ-card" data-cat="eleitor" style="background: white; border: 1px solid var(--je-border); border-radius: 12px; padding: 1.25rem; box-shadow: var(--shadow-sm);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 0.5rem;">
+              <div>
+                <span class="badge-opt" style="font-size: 0.72rem; text-transform: uppercase;">Item 2.6 & 2.7 • Eleitora ou Eleitor</span>
+                <h4 style="font-size: 0.98rem; font-weight: 800; color: var(--je-blue); margin-top: 0.2rem;">Acompanhante de eleitor com deficiência / Uso de instrumentos de auxílio</h4>
+              </div>
+              <span class="badge-yes" style="font-size: 0.72rem; white-space: nowrap;">Págs. 16, 23, 30, 32</span>
+            </div>
+            <p style="font-size: 0.84rem; color: var(--je-text-main); margin-bottom: 0.5rem;"><strong>Quando ocorre:</strong> Eleitor PCD que necessita de auxílio de pessoa de sua escolha na cabina de votação (não pode ser fiscal nem a serviço da JE).</p>
+            <div style="background: var(--je-gray-bg); border-left: 3px solid var(--je-blue); border-radius: 6px; padding: 0.75rem; font-size: 0.82rem; font-family: monospace; color: var(--je-blue-dark);">
+              <strong>Exemplo de anotação na Ata:</strong><br>
+              "Às 09h35, a eleitora com deficiência visual [Nome], título nº [...], foi auxiliada na cabina pelo acompanhante [Nome], portador do RG nº [...], devidamente identificado e advertido quanto ao sigilo do voto."
+            </div>
+          </div>
+
+          <div class="occ-card" data-cat="eleitor" style="background: white; border: 1px solid var(--je-border); border-radius: 12px; padding: 1.25rem; box-shadow: var(--shadow-sm);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 0.5rem;">
+              <div>
+                <span class="badge-opt" style="font-size: 0.72rem; text-transform: uppercase;">Item 2.8 • Eleitora ou Eleitor</span>
+                <h4 style="font-size: 0.98rem; font-weight: 800; color: var(--je-blue); margin-top: 0.2rem;">Assinatura ou impressão da digital em local indevido no Caderno</h4>
+              </div>
+              <span class="badge-yes" style="font-size: 0.72rem; white-space: nowrap;">Pág. 32</span>
+            </div>
+            <p style="font-size: 0.84rem; color: var(--je-text-main); margin-bottom: 0.5rem;"><strong>Quando ocorre:</strong> Eleitor assina na linha correspondente a outro eleitor no Caderno de Votação.</p>
+            <div style="background: var(--je-gray-bg); border-left: 3px solid var(--je-blue); border-radius: 6px; padding: 0.75rem; font-size: 0.82rem; font-family: monospace; color: var(--je-blue-dark);">
+              <strong>Exemplo de anotação na Ata:</strong><br>
+              "Às 15h20, o eleitor [Nome], seq. nº 142, assinou por engano na linha do eleitor seq. nº 143. Colheu-se a assinatura correta no seq. 142 e ressalvou-se a linha 143 para quando o titular comparecer."
+            </div>
+          </div>
+
+          <div class="occ-card" data-cat="eleitor" style="background: white; border: 1px solid var(--je-border); border-radius: 12px; padding: 1.25rem; box-shadow: var(--shadow-sm);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 0.5rem;">
+              <div>
+                <span class="badge-opt" style="font-size: 0.72rem; text-transform: uppercase;">Item 2.9 • Eleitora ou Eleitor</span>
+                <h4 style="font-size: 0.98rem; font-weight: 800; color: var(--je-blue); margin-top: 0.2rem;">Biometria não reconhecida habilitada com ano de nascimento</h4>
+              </div>
+              <span class="badge-yes" style="font-size: 0.72rem; white-space: nowrap;">Págs. 21, 32</span>
+            </div>
+            <p style="font-size: 0.84rem; color: var(--je-text-main); margin-bottom: 0.5rem;"><strong>Quando ocorre:</strong> Após 4 tentativas de biometria com falha, o Presidente digita o ano de nascimento do eleitor e valida com o seu próprio dedo.</p>
+            <div style="background: var(--je-gray-bg); border-left: 3px solid var(--je-blue); border-radius: 6px; padding: 0.75rem; font-size: 0.82rem; font-family: monospace; color: var(--je-blue-dark);">
+              <strong>Exemplo de anotação na Ata:</strong><br>
+              "Às 11h50, o eleitor [Nome], título nº [...], após 4 tentativas sem reconhecimento biométrico, foi habilitado mediante digitação do ano de nascimento [1982] e validação da Presidência, tendo assinado o Caderno de Votação."
+            </div>
+          </div>
+
+          <div class="occ-card" data-cat="eleitor" style="background: white; border: 1px solid var(--je-border); border-radius: 12px; padding: 1.25rem; box-shadow: var(--shadow-sm);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 0.5rem;">
+              <div>
+                <span class="badge-opt" style="font-size: 0.72rem; text-transform: uppercase;">Item 2.10 • Eleitora ou Eleitor</span>
+                <h4 style="font-size: 0.98rem; font-weight: 800; color: var(--je-blue); margin-top: 0.2rem;">Recusa em entregar aparelhos eletrônicos (celular, câmera) antes da cabina</h4>
+              </div>
+              <span class="badge-yes" style="font-size: 0.72rem; white-space: nowrap;">Págs. 20, 32</span>
+            </div>
+            <p style="font-size: 0.84rem; color: var(--je-text-main); margin-bottom: 0.5rem;"><strong>Quando ocorre:</strong> Eleitor se recusa a deixar o celular na mesa receptora antes de entrar na cabina. É proibido votar!</p>
+            <div style="background: var(--je-gray-bg); border-left: 3px solid var(--je-blue); border-radius: 6px; padding: 0.75rem; font-size: 0.82rem; font-family: monospace; color: var(--je-blue-dark);">
+              <strong>Exemplo de anotação na Ata:</strong><br>
+              "Às 13h45, o eleitor [Nome], título nº [...], recusou-se a desligar e depositar o celular na mesa de apoio antes da cabina. Advertido da proibição legal (Lei nº 9.504/97), persistiu na recusa e foi impedido de votar pelo Presidente, sendo lavrada a ocorrência."
+            </div>
+          </div>
+
+          <div class="occ-card" data-cat="eleitor" style="background: white; border: 1px solid var(--je-border); border-radius: 12px; padding: 1.25rem; box-shadow: var(--shadow-sm);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 0.5rem;">
+              <div>
+                <span class="badge-opt" style="font-size: 0.72rem; text-transform: uppercase;">Item 2.11 • Eleitora ou Eleitor</span>
+                <h4 style="font-size: 0.98rem; font-weight: 800; color: var(--je-blue); margin-top: 0.2rem;">Duas últimas pessoas a votar convidadas a acompanhar o encerramento</h4>
+              </div>
+              <span class="badge-yes" style="font-size: 0.72rem; white-space: nowrap;">Págs. 24, 26, 32</span>
+            </div>
+            <p style="font-size: 0.84rem; color: var(--je-text-main); margin-bottom: 0.5rem;"><strong>Quando ocorre:</strong> Às 17h (ou término da fila). Convite para presenciar a emissão do BU e retirada da MR.</p>
+            <div style="background: var(--je-gray-bg); border-left: 3px solid var(--je-blue); border-radius: 6px; padding: 0.75rem; font-size: 0.82rem; font-family: monospace; color: var(--je-blue-dark);">
+              <strong>Exemplo de anotação na Ata:</strong><br>
+              "Às 17h05, convidou-se os dois últimos eleitores que votaram, Sr. [Nome] e Sra. [Nome], para acompanhar o encerramento da urna e a emissão do Boletim de Urna (BU)."
+            </div>
+          </div>
+
+          <!-- GRUPO 3: MESÁRIA OU MESÁRIO (3 ITENS) -->
+          <div class="occ-card" data-cat="mesario" style="background: white; border: 1px solid var(--je-border); border-radius: 12px; padding: 1.25rem; box-shadow: var(--shadow-sm);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 0.5rem;">
+              <div>
+                <span class="badge-opt" style="font-size: 0.72rem; text-transform: uppercase;">Item 3.1, 3.2 & 3.3 • Mesária ou Mesário</span>
+                <h4 style="font-size: 0.98rem; font-weight: 800; color: var(--je-blue); margin-top: 0.2rem;">Atraso, abandono ou substituição de mesário convocado</h4>
+              </div>
+              <span class="badge-yes" style="font-size: 0.72rem; white-space: nowrap;">Págs. 8, 9, 31, 32</span>
+            </div>
+            <p style="font-size: 0.84rem; color: var(--je-text-main); margin-bottom: 0.5rem;"><strong>Quando ocorre:</strong> Não comparecimento até as 07h30, saída não autorizada ou nomeação de substituto ad hoc.</p>
+            <div style="background: var(--je-gray-bg); border-left: 3px solid var(--je-blue); border-radius: 6px; padding: 0.75rem; font-size: 0.82rem; font-family: monospace; color: var(--je-blue-dark);">
+              <strong>Exemplo de anotação na Ata:</strong><br>
+              "Às 07h30, constatou-se a ausência do 2º Mesário convocado, Sr. [Nome], título nº [...]. Para suprir a vaga, o Presidente nomeou a eleitora presente [Nome], título nº [...], que aceitou a nomeação e assumiu a função após orientação."
+            </div>
+          </div>
+
+          <!-- GRUPO 4: FISCAIS E AUTORIDADES (3 ITENS) -->
+          <div class="occ-card" data-cat="fiscais" style="background: white; border: 1px solid var(--je-border); border-radius: 12px; padding: 1.25rem; box-shadow: var(--shadow-sm);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 0.5rem;">
+              <div>
+                <span class="badge-opt" style="font-size: 0.72rem; text-transform: uppercase;">Item 4.1, 4.2 & 4.3 • Fiscais e Autoridades</span>
+                <h4 style="font-size: 0.98rem; font-weight: 800; color: var(--je-blue); margin-top: 0.2rem;">Ausência de fiscais na Zerésima / Protestos e impugnações / Observadores MOE</h4>
+              </div>
+              <span class="badge-yes" style="font-size: 0.72rem; white-space: nowrap;">Págs. 14, 27, 31, 32</span>
+            </div>
+            <p style="font-size: 0.84rem; color: var(--je-text-main); margin-bottom: 0.5rem;"><strong>Quando ocorre:</strong> Registro obrigatório da ausência de fiscais às 07h, registro de impugnação formulada por partido ou recepção de observador da MOE.</p>
+            <div style="background: var(--je-gray-bg); border-left: 3px solid var(--je-blue); border-radius: 6px; padding: 0.75rem; font-size: 0.82rem; font-family: monospace; color: var(--je-blue-dark);">
+              <strong>Exemplo de anotação na Ata:</strong><br>
+              "Às 07h00, não havia fiscais de partido presentes no momento da impressão da Zerésima."<br>
+              <em>(Ou: "Às 11h00, compareceu à seção o Observador Eleitoral da MOE [Nome], credencial nº [...], que acompanhou os trabalhos sem interferência.")</em>
+            </div>
+          </div>
+
+          <!-- GRUPO 5: URNA ELETRÔNICA (4 ITENS) -->
+          <div class="occ-card" data-cat="urna" style="background: white; border: 1px solid var(--je-border); border-radius: 12px; padding: 1.25rem; box-shadow: var(--shadow-sm);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 0.5rem;">
+              <div>
+                <span class="badge-opt" style="font-size: 0.72rem; text-transform: uppercase;">Item 5.1, 5.2, 5.3 & 5.4 • Urna Eletrônica</span>
+                <h4 style="font-size: 0.98rem; font-weight: 800; color: var(--je-blue); margin-top: 0.2rem;">Ajuste de Data/Hora (ADH), interrupção, troca de urna (contingência) e falha de impressão</h4>
+              </div>
+              <span class="badge-yes" style="font-size: 0.72rem; white-space: nowrap;">Págs. 28, 29, 32</span>
+            </div>
+            <p style="font-size: 0.84rem; color: var(--je-text-main); margin-bottom: 0.5rem;"><strong>Quando ocorre:</strong> Falta de luz com bateria interna, necessidade de religar a urna, substituição por urna de reserva ou falha na impressora térmica.</p>
+            <div style="background: var(--je-gray-bg); border-left: 3px solid var(--je-blue); border-radius: 6px; padding: 0.75rem; font-size: 0.82rem; font-family: monospace; color: var(--je-blue-dark);">
+              <strong>Exemplo de anotação na Ata:</strong><br>
+              "Às 13h10, ocorreu interrupção de energia na sala. A urna operou em bateria interna até as 13h40, quando o fornecimento elétrico foi restabelecido. A votação transcorreu normalmente."<br>
+              <em>(Em caso de troca: "...urna reiniciada sem sucesso. Acionado Cartório Eleitoral, o técnico [Nome] efetuou a substituição pela Urna Reserva nº [...], mantendo a integridade dos votos já gravados.")</em>
+            </div>
+          </div>
+
+          <!-- GRUPO 6: VOTAÇÃO POR CÉDULA (3 ITENS) -->
+          <div class="occ-card" data-cat="cedula" style="background: white; border: 1px solid var(--je-border); border-radius: 12px; padding: 1.25rem; box-shadow: var(--shadow-sm);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 0.5rem;">
+              <div>
+                <span class="badge-opt" style="font-size: 0.72rem; text-transform: uppercase;">Item 6.1, 6.2 & 6.3 • Urna de Lona e Votação por Cédula</span>
+                <h4 style="font-size: 0.98rem; font-weight: 800; color: var(--je-blue); margin-top: 0.2rem;">Votação por cédula em caso extremo de contingência</h4>
+              </div>
+              <span class="badge-yes" style="font-size: 0.72rem; white-space: nowrap;">Pág. 32</span>
+            </div>
+            <p style="font-size: 0.84rem; color: var(--je-text-main); margin-bottom: 0.5rem;"><strong>Quando ocorre:</strong> Casos raríssimos em que a urna eletrônica e a urna de contingência são inviabilizadas e o Juiz Eleitoral autoriza voto em papel.</p>
+            <div style="background: var(--je-gray-bg); border-left: 3px solid var(--je-blue); border-radius: 6px; padding: 0.75rem; font-size: 0.82rem; font-family: monospace; color: var(--je-blue-dark);">
+              <strong>Exemplo de anotação na Ata:</strong><br>
+              "Por determinação expressa da Juíza Eleitoral da Zona [...], às 15h00 procedeu-se à substituição por Urna de Lona lacrada nº [...] e votação por cédulas oficiais. Registraram-se 2 cédulas inutilizadas e substituídas por erro do eleitor."
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ABA 9: OPERAÇÃO DA URNA, LOGÍSTICA E ENCERRAMENTO -->
+    <section id="tab-operations" class="tab-pane">
+      <div class="card-box" style="padding: 2rem;">
+        
+        <!-- Cabeçalho da Aba -->
+        <div style="text-align: center; margin-bottom: 2rem;">
+          <h2 style="font-size: 1.35rem; font-weight: 800; color: var(--je-blue); margin-bottom: 0.4rem;">
+            <i class="fa-solid fa-box-archive"></i> 9. Operação da Urna, Logística e Encerramento
+          </h2>
+          <p style="font-size: 0.88rem; color: var(--je-text-muted); font-weight: 500;">
+            Registro de Mesários, Cadernos de Votação, Mídias da Urna, Rito das 17h e Destinação Final • <strong>Manual do Mesário 2026, Págs. 4, 15, 17, 18, 24, 25, 26, 27, 28 e 30</strong>
+          </p>
+        </div>
+
+        <!-- MÓDULO 1: CENÁRIOS DE INTERAÇÃO DA URNA & CADERNOS (3 CARDS EM GRID) -->
+        <div style="margin-bottom: 2.5rem;">
+          <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--je-blue); margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fa-solid fa-terminal" style="color: var(--je-yellow);"></i> Módulo 1 • Cenários de Interação da Urna e Materiais
+          </h3>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem;">
+            
+            <!-- Card: Como Registrar Mesário -->
+            <div style="background: white; border: 1px solid var(--je-border); border-top: 4px solid var(--je-blue); border-radius: 14px; padding: 1.5rem; box-shadow: var(--shadow-sm);">
+              <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.85rem;">
+                <div style="width: 40px; height: 40px; background: var(--je-blue-light); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--je-blue); font-size: 1.2rem;">
+                  <i class="fa-solid fa-user-check"></i>
+                </div>
+                <div>
+                  <h4 style="font-size: 1rem; font-weight: 800; color: var(--je-blue);">Como Registrar um Mesário</h4>
+                  <span style="font-size: 0.75rem; color: var(--je-text-muted);">Terminal do Mesário • Manual pág. 15</span>
+                </div>
+              </div>
+              <div style="font-size: 0.85rem; line-height: 1.5; color: var(--je-text-main);">
+                <p style="margin-bottom: 0.6rem;"><strong>2 Formas de Acesso:</strong></p>
+                <ol style="padding-left: 1.2rem; margin-bottom: 0.8rem;">
+                  <li style="margin-bottom: 0.3rem;"><strong>Logo após a Zerésima:</strong> A urna pergunta na tela: <em>"REGISTRAR MESÁRIO? CONFIRMA: prosseguir"</em>.</li>
+                  <li style="margin-bottom: 0.3rem;"><strong>A qualquer momento do dia:</strong> Apertar a tecla <span style="background:#fee2e2; color:#991b1b; padding:0.1rem 0.4rem; border-radius:4px; font-weight:bold;">CORRIGE</span> e selecionar a <strong>Opção 3 – Registrar mesários</strong>.</li>
+                </ol>
+                <p style="margin-bottom: 0.6rem;"><strong>Passo a Passo na Urna:</strong></p>
+                <ul style="padding-left: 1.2rem; margin-bottom: 0.8rem; list-style-type: disc;">
+                  <li>Digitar o <strong>número do Título de Eleitor</strong> do mesário presente.</li>
+                  <li>Pressionar a tecla <span style="background:#dcfce7; color:#166534; padding:0.1rem 0.4rem; border-radius:4px; font-weight:bold;">CONFIRMA</span>.</li>
+                  <li>Pressionar novamente <span style="background:#dcfce7; color:#166534; padding:0.1rem 0.4rem; border-radius:4px; font-weight:bold;">CONFIRMA</span> para consolidar. Repetir para os demais membros.</li>
+                  <li>Ao terminar todos, apertar <span style="background:#fee2e2; color:#991b1b; padding:0.1rem 0.4rem; border-radius:4px; font-weight:bold;">CORRIGE</span> para voltar ao início da votação.</li>
+                </ul>
+                <div style="background: var(--je-yellow-light); border-left: 3px solid var(--je-yellow); padding: 0.6rem; border-radius: 6px; font-size: 0.8rem; color: #b45309;">
+                  <strong>Obrigatório:</strong> Todos os mesários devem assinar também a Ata física da seção, mesmo registrando na urna!
+                </div>
+              </div>
+            </div>
+
+            <!-- Card: Quantos são os Cadernos de Votação -->
+            <div style="background: white; border: 1px solid var(--je-border); border-top: 4px solid var(--je-green); border-radius: 14px; padding: 1.5rem; box-shadow: var(--shadow-sm);">
+              <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.85rem;">
+                <div style="width: 40px; height: 40px; background: var(--je-green-light); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--je-green); font-size: 1.2rem;">
+                  <i class="fa-solid fa-book-bookmark"></i>
+                </div>
+                <div>
+                  <h4 style="font-size: 1rem; font-weight: 800; color: var(--je-blue);">Quantos são os Cadernos de Votação?</h4>
+                  <span style="font-size: 0.75rem; color: var(--je-text-muted);">Composição e Busca • Manual págs. 17 e 18</span>
+                </div>
+              </div>
+              <div style="font-size: 0.85rem; line-height: 1.5; color: var(--je-text-main);">
+                <p style="margin-bottom: 0.6rem;">A seção pode receber até <strong>3 cadernos físicos distintos</strong>:</p>
+                <ul style="padding-left: 1.2rem; margin-bottom: 0.8rem; list-style-type: disc;">
+                  <li style="margin-bottom: 0.4rem;"><strong>1. Caderno da Seção Principal:</strong> Contém a lista de eleitores regulares da seção por ordem alfabética.</li>
+                  <li style="margin-bottom: 0.4rem;"><strong>2. Caderno de Seção Agregada:</strong> Presente quando o Cartório agrupa duas seções em uma única urna física.</li>
+                  <li style="margin-bottom: 0.4rem;"><strong>3. Caderno de Transferência Temporária (TTE):</strong> Pessoas que transferiram o voto (militares em serviço, mesários e apoio logístico, PCD transferidos).</li>
+                </ul>
+                <div style="background: #e0f2fe; border-left: 3px solid #0284c7; padding: 0.6rem; border-radius: 6px; font-size: 0.8rem; color: #0369a1; margin-bottom: 0.6rem;">
+                  <strong>Atenção de Ouro (Pág. 18):</strong> O número sequencial se repete em todos os cadernos! O mesário deve checar se o eleitor está no caderno principal ou no TTE antes de procurar pelo número sequencial.
+                </div>
+                <p style="font-size: 0.8rem; color: var(--je-text-muted);"><strong>Anexos no final do Caderno:</strong> Lista de Eleitores com Nome Social (pág. 16) e Lista de Eleitores Impedidos de Votar (pág. 20).</p>
+              </div>
+            </div>
+
+            <!-- Card: Mídias da Urna Eletrônica -->
+            <div style="background: white; border: 1px solid var(--je-border); border-top: 4px solid #0284c7; border-radius: 14px; padding: 1.5rem; box-shadow: var(--shadow-sm);">
+              <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.85rem;">
+                <div style="width: 40px; height: 40px; background: #e0f2fe; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #0284c7; font-size: 1.2rem;">
+                  <i class="fa-solid fa-hard-drive"></i>
+                </div>
+                <div>
+                  <h4 style="font-size: 1rem; font-weight: 800; color: var(--je-blue);">Quais Mídias a Urna Possui?</h4>
+                  <span style="font-size: 0.75rem; color: var(--je-text-muted);">Armazenamento e Criptografia • Manual págs. 4, 24 e 25</span>
+                </div>
+              </div>
+              <div style="font-size: 0.85rem; line-height: 1.5; color: var(--je-text-main);">
+                <p style="margin-bottom: 0.6rem;">A urna eletrônica opera com <strong>3 tipos de mídias</strong>:</p>
+                <div style="background: var(--je-gray-bg); border-radius: 8px; padding: 0.75rem; margin-bottom: 0.6rem;">
+                  <strong style="color: var(--je-blue);">1. Mídia de Resultado (MR) – Removível:</strong>
+                  <p style="font-size: 0.82rem; color: var(--je-text-muted); margin-top: 0.2rem;">É o pendrive especial criptografado localizado no compartimento da lateral direita da urna. É nele que se gravam os BUs após as 17h. É retirada pelo Presidente, guardada em envelope lacrado e levada ao ponto de transmissão.</p>
+                </div>
+                <div style="background: var(--je-gray-bg); border-radius: 8px; padding: 0.75rem; margin-bottom: 0.6rem;">
+                  <strong style="color: var(--je-blue);">2. Mídia de Votação (MV) – Interna / Fixa:</strong>
+                  <p style="font-size: 0.82rem; color: var(--je-text-muted); margin-top: 0.2rem;">Memória interna não removível da urna. Armazena o sistema operacional, as tabelas de candidatos e a gravação redundante do Registro Digital do Voto (RDV).</p>
+                </div>
+                <div style="background: var(--je-gray-bg); border-radius: 8px; padding: 0.75rem;">
+                  <strong style="color: var(--je-blue);">3. Mídia de Carga (MC) – Exclusiva de Técnicos:</strong>
+                  <p style="font-size: 0.82rem; color: var(--je-text-muted); margin-top: 0.2rem;">Utilizada apenas pelos servidores do Cartório na Cerimônia de Preparação e em contingências de troca de software.</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- MÓDULO 2: PASSO A PASSO DO ENCERRAMENTO DA VOTAÇÃO (17H) -->
+        <div style="background: white; border: 1px solid var(--je-border); border-radius: 14px; padding: 1.75rem; margin-bottom: 2.5rem; box-shadow: var(--shadow-sm);">
+          <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--je-blue); margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fa-solid fa-hourglass-end" style="color: var(--je-red);"></i> Módulo 2 • Rito do Encerramento da Votação Passo a Passo (Manual Págs. 24 a 28)
+          </h3>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem;">
+            
+            <div style="background: var(--je-gray-bg); border-radius: 10px; padding: 1.1rem; border-left: 4px solid var(--je-yellow);">
+              <span style="font-size: 0.75rem; font-weight: 800; color: #b45309; text-transform: uppercase;">Passo 1 • 17h00 em Ponto</span>
+              <h4 style="font-size: 0.95rem; font-weight: 800; color: var(--je-blue); margin: 0.3rem 0 0.5rem;">Distribuição de Senhas e Bloqueio</h4>
+              <p style="font-size: 0.83rem; line-height: 1.4; color: var(--je-text-muted);">
+                Às 17h00 em ponto, o Secretário distribui senhas aos eleitores presentes na fila, da <strong>última pessoa até a primeira</strong>. Ninguém mais pode entrar na fila.
+              </p>
+            </div>
+
+            <div style="background: var(--je-gray-bg); border-radius: 10px; padding: 1.1rem; border-left: 4px solid var(--je-yellow);">
+              <span style="font-size: 0.75rem; font-weight: 800; color: #b45309; text-transform: uppercase;">Passo 2 • Caderno de Votação</span>
+              <h4 style="font-size: 0.95rem; font-weight: 800; color: var(--je-blue); margin: 0.3rem 0 0.5rem;">Anotação de "NC" nos Faltosos</h4>
+              <p style="font-size: 0.83rem; line-height: 1.4; color: var(--je-text-muted);">
+                O 1º ou 2º Mesário anota a sigla <strong>"NC"</strong> (Não Compareceu) no espaço de assinatura de cada eleitor que não compareceu para votar.
+              </p>
+            </div>
+
+            <div style="background: var(--je-gray-bg); border-radius: 10px; padding: 1.1rem; border-left: 4px solid var(--je-blue);">
+              <span style="font-size: 0.75rem; font-weight: 800; color: var(--je-blue); text-transform: uppercase;">Passo 3 • Terminal da Urna</span>
+              <h4 style="font-size: 0.95rem; font-weight: 800; color: var(--je-blue); margin: 0.3rem 0 0.5rem;">Comando de Encerramento</h4>
+              <p style="font-size: 0.83rem; line-height: 1.4; color: var(--je-text-muted);">
+                Após o último eleitor votar, o Presidente acessa o menu da urna, seleciona o encerramento e confirma com seu código e título de eleitor.
+              </p>
+            </div>
+
+            <div style="background: var(--je-gray-bg); border-radius: 10px; padding: 1.1rem; border-left: 4px solid var(--je-green);">
+              <span style="font-size: 0.75rem; font-weight: 800; color: var(--je-green); text-transform: uppercase;">Passo 4 • Impressão dos BUs</span>
+              <h4 style="font-size: 0.95rem; font-weight: 800; color: var(--je-blue); margin: 0.3rem 0 0.5rem;">Boletins de Urna Obrigatórios</h4>
+              <p style="font-size: 0.83rem; line-height: 1.4; color: var(--je-text-muted);">
+                A urna imprime no mínimo 5 vias obrigatórias do BU. A mesa verifica se a impressão está legível e pressiona <span style="background:#dcfce7; color:#166534; padding:0.1rem 0.3rem; border-radius:3px; font-weight:bold;">CONFIRMA</span>.
+              </p>
+            </div>
+
+            <div style="background: var(--je-gray-bg); border-radius: 10px; padding: 1.1rem; border-left: 4px solid var(--je-green);">
+              <span style="font-size: 0.75rem; font-weight: 800; color: var(--je-green); text-transform: uppercase;">Passo 5 • Gravação e Retirada da MR</span>
+              <h4 style="font-size: 0.95rem; font-weight: 800; color: var(--je-blue); margin: 0.3rem 0 0.5rem;">Lacre Azul na Urna Eletrônica</h4>
+              <p style="font-size: 0.83rem; line-height: 1.4; color: var(--je-text-muted);">
+                A urna grava na Mídia de Resultado (MR). O Presidente desliga a tampa, retira o pendrive MR, <strong>rubrica na folha de lacres</strong> antes de descolar o Lacre Azul e o cola na tampa da urna.
+              </p>
+            </div>
+
+            <div style="background: var(--je-gray-bg); border-radius: 10px; padding: 1.1rem; border-left: 4px solid var(--je-blue);">
+              <span style="font-size: 0.75rem; font-weight: 800; color: var(--je-blue); text-transform: uppercase;">Passo 6 • Demais Relatórios e Ata</span>
+              <h4 style="font-size: 0.95rem; font-weight: 800; color: var(--je-blue); margin: 0.3rem 0 0.5rem;">BUJ, BIM, BEHB e Fechamento</h4>
+              <p style="font-size: 0.83rem; line-height: 1.4; color: var(--je-text-muted);">
+                A urna imprime o BUJ, BIM e BEHB. Todos assinam a conclusão da Ata. <strong>1 via do BU é afixada imediatamente na porta da seção</strong>.
+              </p>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- MÓDULO 3: MATRIZ DE DESTINAÇÃO FÍSICA DOS MATERIAIS (O QUE VAI PARA ONDE?) -->
+        <div>
+          <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--je-blue); margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fa-solid fa-truck-ramp-box" style="color: var(--je-green);"></i> Módulo 3 • Matriz de Triagem e Destinação Final dos Materiais (Manual Págs. 26 e 27)
+          </h3>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem;">
+            
+            <!-- Coluna 1: Afixação na Porta da Seção -->
+            <div style="background: white; border: 1px solid var(--je-border); border-top: 4px solid var(--je-yellow); border-radius: 14px; padding: 1.5rem; box-shadow: var(--shadow-sm);">
+              <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1rem;">
+                <div style="width: 36px; height: 36px; background: var(--je-yellow-light); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #b45309; font-size: 1.1rem;">
+                  <i class="fa-solid fa-thumbtack"></i>
+                </div>
+                <div>
+                  <h4 style="font-size: 0.98rem; font-weight: 800; color: var(--je-blue);">1. Afixar na Porta da Seção</h4>
+                  <span style="font-size: 0.75rem; color: var(--je-text-muted);">Publicidade imediata ao cidadão</span>
+                </div>
+              </div>
+              <ul style="font-size: 0.84rem; line-height: 1.55; color: var(--je-text-main); list-style-type: none; padding-left: 0;">
+                <li style="margin-bottom: 0.6rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--je-border);">
+                  <strong style="color: var(--je-blue);"><i class="fa-solid fa-file-lines"></i> Resumo da Zerésima:</strong><br>
+                  Afixado às 07h00 logo após o teste do teclado e emissão pela urna.
+                </li>
+                <li style="margin-bottom: 0.6rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--je-border);">
+                  <strong style="color: var(--je-blue);"><i class="fa-solid fa-file-invoice"></i> 1ª Via do Boletim de Urna (BU):</strong><br>
+                  Afixada imediatamente às 17h00 para transparência pública do resultado.
+                </li>
+                <li>
+                  <strong style="color: var(--je-blue);"><i class="fa-solid fa-list-ol"></i> Lista de Candidatas e Candidatos:</strong><br>
+                  Afixada no recinto da seção (se fornecida pelo Cartório Eleitoral).
+                </li>
+              </ul>
+            </div>
+
+            <!-- Coluna 2: Envelope / Malote para a Junta Eleitoral -->
+            <div style="background: white; border: 1px solid var(--je-border); border-top: 4px solid var(--je-red); border-radius: 14px; padding: 1.5rem; box-shadow: var(--shadow-sm);">
+              <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1rem;">
+                <div style="width: 36px; height: 36px; background: #fee2e2; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--je-red); font-size: 1.1rem;">
+                  <i class="fa-solid fa-envelope-open-text"></i>
+                </div>
+                <div>
+                  <h4 style="font-size: 0.98rem; font-weight: 800; color: var(--je-blue);">2. Envelope para a Junta Eleitoral</h4>
+                  <span style="font-size: 0.75rem; color: var(--je-text-muted);">Totalização, Apuração e Cartório (Pág. 27)</span>
+                </div>
+              </div>
+              <ul style="font-size: 0.84rem; line-height: 1.5; color: var(--je-text-main); list-style-type: none; padding-left: 0;">
+                <li style="margin-bottom: 0.4rem;"><strong>√ Mídia de Resultado (MR)</strong> em envelope próprio;</li>
+                <li style="margin-bottom: 0.4rem;"><strong>√ 2 vias obrigatórias do BU</strong> assinadas pela Mesa e fiscais;</li>
+                <li style="margin-bottom: 0.4rem;"><strong>√ 1 via do BUJ</strong> (Boletim de Justificativas);</li>
+                <li style="margin-bottom: 0.4rem;"><strong>√ 1 via do BIM</strong> (Identificação de Mesários);</li>
+                <li style="margin-bottom: 0.4rem;"><strong>√ 1 via do BEHB</strong> (Habilitados Biograficamente);</li>
+                <li style="margin-bottom: 0.4rem;"><strong>√ Zerésima completa</strong> assinada;</li>
+                <li style="margin-bottom: 0.4rem;"><strong>√ Ata da Mesa Receptora</strong> preenchida e assinada (com 3ª via do BU anexada);</li>
+                <li style="margin-bottom: 0.4rem;"><strong>√ Cadernos de Votação</strong> com "NC" anotados;</li>
+                <li style="margin-bottom: 0.4rem;"><strong>√ Formulários RJE</strong> (Requerimentos de Justificativa);</li>
+                <li style="margin-bottom: 0.4rem;"><strong>√ Formulários de Eleitor PCD</strong> preenchidos;</li>
+                <li><strong>√ Comprovantes esquecidos</strong> ou recusados pelo eleitor.</li>
+              </ul>
+            </div>
+
+            <!-- Coluna 3: Caixa da Urna / Devolução de Logística Geral -->
+            <div style="background: white; border: 1px solid var(--je-border); border-top: 4px solid var(--je-green); border-radius: 14px; padding: 1.5rem; box-shadow: var(--shadow-sm);">
+              <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1rem;">
+                <div style="width: 36px; height: 36px; background: var(--je-green-light); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--je-green); font-size: 1.1rem;">
+                  <i class="fa-solid fa-box-archive"></i>
+                </div>
+                <div>
+                  <h4 style="font-size: 0.98rem; font-weight: 800; color: var(--je-blue);">3. Caixa da Urna e Materiais</h4>
+                  <span style="font-size: 0.75rem; color: var(--je-text-muted);">Devolução física à equipe de transporte</span>
+                </div>
+              </div>
+              <ul style="font-size: 0.84rem; line-height: 1.55; color: var(--je-text-main); list-style-type: none; padding-left: 0;">
+                <li style="margin-bottom: 0.6rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--je-border);">
+                  <strong style="color: var(--je-blue);"><i class="fa-solid fa-laptop"></i> Urna Eletrônica Lacrada:</strong><br>
+                  Acondicionada na embalagem almofadada com o Lacre Azul colado na tampa da MR.
+                </li>
+                <li style="margin-bottom: 0.6rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--je-border);">
+                  <strong style="color: var(--je-blue);"><i class="fa-solid fa-person-booth"></i> Cabina de Votação:</strong><br>
+                  Desmontada, dobrada cuidadosamente e guardada na sacola/embalagem original.
+                </li>
+                <li style="margin-bottom: 0.6rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--je-border);">
+                  <strong style="color: var(--je-blue);"><i class="fa-solid fa-plug"></i> Cabos e Acessórios:</strong><br>
+                  Cabo de força, fonte de alimentação e bobinas de papel sobressalentes.
+                </li>
+                <li>
+                  <strong style="color: var(--je-blue);"><i class="fa-solid fa-folder-open"></i> Sobras de Formulários em Branco:</strong><br>
+                  Formulários não utilizados (preservar para devolução ao Cartório Eleitoral).
+                </li>
+              </ul>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- Rodapé -->
+  <footer>
+    <div>
+      <strong>Instrutoria de Mesários 2026</strong> • Tribunal Superior Eleitoral (TSE)
+    </div>
+    <div>
+      Material didático gerado com base no <em>Manual do Mesário 2026</em>
+    </div>
+  </footer>
+
+  <!-- Dados em Markdown e Script do Markmap -->
+  <script>
+    const mindmapDataMarkdown = `
+# Mesa Receptora de Votos (MRV)
+## 👤 Presidente da Seção
+### Liderança & Manutenção da Ordem
+- Autoridade máxima no recinto da seção
+- Conduz trabalhos e mantém a ordem no local
+- Aciona forças de segurança pública quando necessário
+- Esclarece dúvidas e soluciona conflitos com serenidade
+- Comunica ocorrências graves ao Juiz Eleitoral
+### Operação da Urna Eletrônica
+- Ligar urna e executar teste obrigatório do teclado
+- Emitir Zerésima convidando as 2 primeiras pessoas da fila
+- Digitar CPF ou Título de Eleitor no Terminal do Mesário
+- Ditar em voz alta o nome e o número sequencial do eleitor
+- Habilitar biometria no terminal
+- **Validação de falha biométrica**: após 4 tentativas, insere ano de nascimento e confirma com seu próprio dedo
+- Registrar justificativas pelo número do Título de Eleitor
+- Comandar encerramento a partir das 17h
+- Extrair a Mídia de Resultado (MR) e aplicar lacre de reposição azul
+### Relações & Logística
+- Conferir credenciais de fiscais partidários e delegados
+- Receber observadores da Missão de Observação Eleitoral (MOE)
+- Afixar Resumo da Zerésima na abertura e 1 via do BU no encerramento
+- Guardar 1 via do BU para conferência posterior no portal do TSE
+- Devolver materiais e urna lacrada à Junta Eleitoral
+
+## 👥 1º e 2º Mesários
+### Linha Sucessória
+- 1º Mesário assume se o Presidente faltar até às 07h30
+- 2º Mesário substitui o 1º Mesário ou assume presidência na falta de ambos
+### Caderno de Votação
+- Localizar eleitor pelo número sequencial e iniciais do topo da página
+- Confirmar nome em voz alta
+- **Regra de ouro da assinatura**:
+  - Se identificação biométrica OK: **NÃO assina**
+  - Se sem biometria ou com falha biométrica: **ASSINA**
+- Anotar "NC" (Não Compareceu) nos faltosos após as 17h
+### Comprovantes e Atendimento
+- Entregar comprovante de voto após liberação da cabina
+- Guardar canhotos de eleitores que recusarem no envelope
+- Auxiliar nos canhotos do Requerimento de Justificativa (RJE)
+### Atas e Documentação
+- Preencher a Ata da Mesa Receptora com ocorrências do dia
+- Colher assinaturas dos fiscais de partidos que comparecerem
+- Registrar dados de acompanhantes de eleitores com deficiência
+- Oferecer Formulário de Identificação de Eleitor com Deficiência
+
+## 🚪 Secretária ou Secretário
+### Triagem e Entrada
+- Recepcionar eleitores na porta da sala
+- Conferir se o eleitor vota na seção e local corretos
+- Conferir documento oficial com foto (ou e-Título com foto)
+- Perguntar se sabe o número do CPF para agilizar a habilitação
+### Organização de Fila e Prioridades
+- **Superprioridade absoluta**: pessoas com 80 anos ou mais
+- Prioridades por ordem de chegada:
+  - 60 anos ou mais
+  - Pessoas com deficiência (PCD) ou mobilidade reduzida
+  - Pessoas com autismo (TEA)
+  - Gestantes, lactantes e com crianças de colo
+  - Pessoas obesas e enfermas
+  - **Acompanhante de PCD** (mesmo se votar em outra seção)
+  - Doadores de sangue (comprovante até 120 dias)
+  - Juízes, promotores, servidores JE e policiais em serviço
+### Procedimento Pontual das 17h
+- Às 17h00 em ponto: conferir eleitores na fila
+- Distribuir senhas da **última pessoa até a primeira**
+- Não permitir que novas pessoas entrem na fila após as 17h
+
+## 📝 Documentos e Assinaturas
+### Assinados com Fiscais de Partido
+- Zerésima e Resumo da Zerésima (07h00)
+- Ata da Mesa Receptora (Abertura, durante o dia e Encerramento)
+- Boletim de Urna - BU (mínimo 5 vias - 1ª via na porta)
+- Boletim de Justificativa - BUJ
+### Restritos aos Mesários (SEM Fiscais)
+- BIM - Boletim de Identificação de Mesário
+- BEHB - Boletim de Emissão de Hora Certa
+### Regra do Caderno de Votação
+- Biometria reconhecida: NÃO assina
+- Sem biometria ou com falha (4x): OBRIGATÓRIO assinar
+- Anotação de "NC" nos faltosos às 17h
+### Lacre de Segurança da MR
+- Lacre Azul: Presidente assina na folha antes de descolar e colar
+
+## 📋 Registro de Ocorrências em Ata (Verso da Ata)
+### 1. Votação e Justificativa
+- Atraso de abertura ou encerramento
+### 2. Eleitoras e Eleitores
+- 2 primeiras pessoas na Zerésima
+- Recusa a votar ou incapacidade
+- Voto sem constar no Caderno / Falta de dados na urna
+- Dúvidas de identidade e impugnações de fiscais
+- Acompanhante de PCD e instrumentos de auxílio
+- Assinatura/digital indevida no Caderno
+- Biometria não reconhecida (ano de nascimento)
+- Recusa de entregar celular na entrada
+- 2 últimas pessoas no encerramento (17h)
+### 3. Mesárias e Mesários
+- Atraso, abandono ou substituição ad hoc
+### 4. Fiscais e Autoridades
+- Ausência na Zerésima às 07h
+- Protestos/impugnações registradas
+- Presença de Observador MOE
+### 5. Urna e Contingência
+- Ajuste de Data e Hora (ADH)
+- Bateria interna e interrupção
+- Urna reserva (contingência)
+- Votação por cédula/urna de lona
+
+## 📦 Urna, Logística e Encerramento
+### Terminal do Mesário
+- Registrar Mesário: Menu Opção 3
+- Validação de falha biométrica (4x)
+- Encerramento às 17h
+### Cadernos de Votação
+- Caderno Principal da Seção
+- Caderno de Seção Agregada
+- Caderno de Transferência Temporária (TTE)
+- Anexos: Nome Social e Impedidos de Votar
+### Mídias da Urna
+- Mídia de Resultado (MR) - removível, lacrada com Lacre Azul
+- Mídia de Votação (MV) - interna fixa, software e RDV
+### Destinação Final dos Materiais
+- Afixar na Seção: Resumo da Zerésima e 1ª via do BU
+- Envelope Junta Eleitoral: MR, 2 vias BU, BUJ, BIM, BEHB, Ata, Cadernos com NC, RJE
+- Caixa da Urna: Urna lacrada, Cabina dobrada, cabos e sobras
+`;
+
+    // Controle de Abas
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      
+      document.getElementById(tabId).classList.add('active');
+      event.currentTarget.classList.add('active');
+
+      if (tabId === 'tab-mindmap') {
+        setTimeout(fitView, 150);
+      }
+    }
+
+    // Inicialização do Markmap
+    let mmInstance = null;
+    let markmapRoot = null;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      // Inicializar Mermaid se carregado
+      if (typeof mermaid !== 'undefined') {
+        try {
+          mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
+        } catch (e) {
+          console.warn('Mermaid warning:', e);
+        }
+      }
+
+      // Inicializar Markmap
+      try {
+        const { Transformer, Markmap } = window.markmap;
+        const transformer = new Transformer();
+        const { root } = transformer.transform(mindmapDataMarkdown);
+        markmapRoot = root;
+
+        const svgEl = document.getElementById('markmap-svg');
+        mmInstance = Markmap.create(svgEl, {
+          autoFit: true,
+          duration: 300
+        }, root);
+
+        console.log('MARKMAP_SUCCESS');
+      } catch (err) {
+        console.error('Markmap error:', err);
+      }
+    });
+
+    function fitView() {
+      if (mmInstance) mmInstance.fit();
+    }
+
+    function expandAll() {
+      if (!markmapRoot || !mmInstance) return;
+      function setFold(node, fold) {
+        if (node.children) {
+          node.payload = { ...(node.payload || {}), fold };
+          node.children.forEach(c => setFold(c, fold));
+        }
+      }
+      setFold(markmapRoot, 0);
+      mmInstance.setData(markmapRoot);
+      mmInstance.fit();
+    }
+
+    function collapseAll() {
+      if (!markmapRoot || !mmInstance) return;
+      function setFold(node, fold) {
+        if (node.children) {
+          node.payload = { ...(node.payload || {}), fold: node.depth >= 1 ? 1 : 0 };
+          node.children.forEach(c => setFold(c, fold));
+        }
+      }
+      setFold(markmapRoot, 1);
+      mmInstance.setData(markmapRoot);
+      mmInstance.fit();
+    }
+
+    async function exportMapAsPNG() {
+      const btn = document.getElementById('btn-export-png');
+      const originalHtml = btn.innerHTML;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Gerando PNG...';
+      btn.disabled = true;
+
+      try {
+        // Enquadra o mapa antes de capturar
+        if (mmInstance) {
+          await mmInstance.fit();
+        }
+        await new Promise(r => setTimeout(r, 300));
+
+        const targetEl = document.querySelector('.mindmap-viewport');
+        const canvas = await html2canvas(targetEl, {
+          backgroundColor: '#FFFFFF',
+          scale: 2, // 2x para imagem super nítida
+          logging: false,
+          useCORS: true
+        });
+
+        // Disparar download
+        const a = document.createElement('a');
+        a.download = 'mapa_mental_mrv_eleicoes_2026.png';
+        a.href = canvas.toDataURL('image/png');
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        btn.innerHTML = '<i class="fa-solid fa-check"></i> Imagem Baixada!';
+        setTimeout(() => {
+          btn.innerHTML = originalHtml;
+          btn.disabled = false;
+        }, 2500);
+      } catch (e) {
+        console.error('Erro na exportação para PNG:', e);
+        btn.innerHTML = originalHtml;
+        btn.disabled = false;
+      }
+    }
+
+    // Funções de Controle do Checklist Interativo
+    function updateChecklistProgress() {
+      const items = document.querySelectorAll('.chk-item');
+      const total = items.length;
+      let checked = 0;
+      items.forEach(item => {
+        if (item.checked) {
+          checked++;
+          item.parentElement.style.opacity = '0.7';
+          item.parentElement.style.textDecoration = 'line-through';
+        } else {
+          item.parentElement.style.opacity = '1';
+          item.parentElement.style.textDecoration = 'none';
+        }
+      });
+
+      const pct = Math.round((checked / total) * 100);
+      const counterEl = document.getElementById('checklist-counter');
+      const barEl = document.getElementById('checklist-progress-bar');
+      const alertEl = document.getElementById('checklist-ready-alert');
+
+      if (counterEl) counterEl.textContent = `${checked} de ${total} itens conferidos (${pct}%)`;
+      if (barEl) barEl.style.width = `${pct}%`;
+
+      if (alertEl) {
+        if (checked === total && total > 0) {
+          alertEl.style.display = 'block';
+        } else {
+          alertEl.style.display = 'none';
+        }
+      }
+    }
+
+    function checkAllItems() {
+      document.querySelectorAll('.chk-item').forEach(item => item.checked = true);
+      updateChecklistProgress();
+    }
+
+    function clearAllItems() {
+      document.querySelectorAll('.chk-item').forEach(item => item.checked = false);
+      updateChecklistProgress();
+    }
+
+    // Funções da Aba 7: Filtro de Documentos e Assinaturas
+    function filterDocs(category) {
+      document.querySelectorAll('#tab-signatures .btn-group .ctrl-btn').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = document.getElementById(`btn-filter-${category}`);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      const rows = document.querySelectorAll('#table-signatures tbody tr');
+      rows.forEach(row => {
+        if (category === 'all') {
+          row.style.display = '';
+        } else {
+          const cats = row.getAttribute('data-category') || '';
+          if (cats.includes(category)) {
+            row.style.display = '';
+          } else {
+            row.style.display = 'none';
+          }
+        }
+      });
+    }
+
+    // Funções da Aba 7: Simulador Rápido de Fixação (Quiz)
+    function answerQuiz(qNum, isCorrect, btnEl) {
+      const parent = btnEl.parentElement;
+      parent.querySelectorAll('button').forEach(b => {
+        b.style.pointerEvents = 'none';
+        b.style.opacity = '0.6';
+      });
+      btnEl.style.opacity = '1';
+
+      const feedbackEl = document.getElementById(`quiz-feedback-${qNum}`);
+      if (!feedbackEl) return;
+
+      feedbackEl.style.display = 'block';
+      if (isCorrect) {
+        btnEl.style.background = 'var(--je-green)';
+        btnEl.style.color = 'white';
+        btnEl.style.borderColor = 'var(--je-green)';
+        feedbackEl.style.background = 'var(--je-green-light)';
+        feedbackEl.style.color = 'var(--je-green)';
+        feedbackEl.style.border = '1px solid var(--je-green)';
+        
+        let explanation = '';
+        if (qNum === 1) explanation = '<strong>Correto! (Págs. 19, 21):</strong> O eleitor com biometria reconhecida NÃO assina o caderno. A biometria substitui legalmente a assinatura manual.';
+        else if (qNum === 2) explanation = '<strong>Correto! (Pág. 26):</strong> O BIM é de assinatura restrita aos mesários da mesa. Fiscais assinam BU, BUJ, Ata e Zerésima, mas NÃO assinam o BIM nem o BEHB.';
+        else if (qNum === 3) explanation = '<strong>Correto! (Pág. 25):</strong> O Presidente deve rubricar o lacre azul na própria folha antes de descolá-lo, para manter a integridade física do adesivo.';
+        else if (qNum === 4) explanation = '<strong>Correto! (Págs. 15, 26):</strong> Tanto o Resumo da Zerésima (às 07h) quanto a 1ª via do BU (às 17h) devem ser afixados em local público na porta do recinto para ampla fiscalização.';
+
+        feedbackEl.innerHTML = `<i class="fa-solid fa-circle-check"></i> ${explanation}`;
+      } else {
+        btnEl.style.background = 'var(--je-red)';
+        btnEl.style.color = 'white';
+        btnEl.style.borderColor = 'var(--je-red)';
+        feedbackEl.style.background = '#fee2e2';
+        feedbackEl.style.color = '#991b1b';
+        feedbackEl.style.border = '1px solid var(--je-red)';
+        
+        let explanation = '';
+        if (qNum === 1) explanation = '<strong>Incorreto! (Págs. 19, 21):</strong> Quando a biometria é reconhecida, a assinatura é terminantemente DISPENSADA. Assinam apenas eleitores sem biometria ou com falha biométrica.';
+        else if (qNum === 2) explanation = '<strong>Incorreto! (Pág. 26):</strong> O BIM (Boletim de Identificação de Mesário) é de assinatura EXCLUSIVA dos mesários. Fiscais não podem assiná-lo.';
+        else if (qNum === 3) explanation = '<strong>Incorreto! (Pág. 25):</strong> Assinar depois de colado na urna pode danificar o lacre ou ficar ilegível. A instrução oficial exige rubricar na folha antes de descolar.';
+        else if (qNum === 4) explanation = '<strong>Incorreto! (Págs. 15, 26):</strong> Eles NÃO podem ficar guardados. São documentos de transparência pública obrigatória e devem ser fixados na porta da seção.';
+
+        feedbackEl.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> ${explanation}`;
+      }
+    }
+
+    // Funções da Aba 8: Filtro de Ocorrências em Ata
+    function filterOccurrences(cat) {
+      document.querySelectorAll('#tab-occurrences .btn-group .ctrl-btn').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = document.getElementById(`btn-cat-${cat}`);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      const cards = document.querySelectorAll('#occurrences-container .occ-card');
+      cards.forEach(card => {
+        if (cat === 'all') {
+          card.style.display = 'block';
+        } else {
+          const cardCat = card.getAttribute('data-cat') || '';
+          if (cardCat === cat) {
+            card.style.display = 'block';
+          } else {
+            card.style.display = 'none';
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>
